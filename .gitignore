@@ -1,18 +1,53 @@
+# 의존성
 node_modules
+.pnpm-store
+
+# 빌드 산출물
 dist
+dist-ssr
+
+# 환경변수 (API 키 포함 — 절대 커밋 금지)
+.env
 .env.local
 .env.*.local
 *.local
 
-# Editor
+# 로그
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 에디터
 .vscode/settings.json
+.vscode/extensions.json
 .idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.swp
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
+
+# TypeScript 빌드 캐시
+*.tsbuildinfo
+
+# 테스트 커버리지
+coverage
+
+# 임시 파일
+*.tmp
+*.bak
+*.orig

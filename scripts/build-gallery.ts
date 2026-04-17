@@ -6,9 +6,18 @@
  * courses.json의 각 코스의 waypoints를 ORS로 라우팅하여
  * route, routeSimplified 필드를 채운다.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { LineString } from 'geojson';
+
+// .env.local 자동 로드
+const envPath = join(process.cwd(), '.env.local');
+if (existsSync(envPath)) {
+  for (const line of readFileSync(envPath, 'utf-8').split('\n')) {
+    const m = line.match(/^([^#][^=]*)=(.*)$/);
+    if (m) process.env[m[1].trim()] = m[2].trim();
+  }
+}
 
 const ORS_KEY = process.env.VITE_ORS_KEY;
 const ORS_URL = 'https://api.openrouteservice.org/v2/directions/foot-walking/geojson';
