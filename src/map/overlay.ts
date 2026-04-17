@@ -24,29 +24,27 @@ export function loadOverlay(courses: Course[]): void {
   src.setData({ type: 'FeatureCollection', features } as FeatureCollection);
 }
 
-export function setSelectedCourse(id: string | null): void {
-  const map = getMap();
-  if (selectedId) {
-    map.setFeatureState({ source: SRC_OVERLAY, id: selectedId }, { selected: false });
-  }
+/** 버튼 클릭 시 해당 코스만 표시. null이면 모두 숨김 */
+export function showOnlyCourse(id: string | null): void {
   selectedId = id;
-  if (id) {
-    map.setFeatureState({ source: SRC_OVERLAY, id }, { selected: true });
-  }
+  applyFilter();
 }
 
 export function setEditingCourse(id: string | null): void {
   editingId = id;
-  applyEditingFilter();
+  applyFilter();
 }
 
-function applyEditingFilter(): void {
+function applyFilter(): void {
   const map = getMap();
   if (!map.getLayer(LYR_OVERLAY_LINES)) return;
 
-  if (editingId) {
-    map.setFilter(LYR_OVERLAY_LINES, ['!=', ['get', 'id'], editingId]);
-  } else {
+  if (!selectedId || selectedId === editingId) {
+    map.setPaintProperty(LYR_OVERLAY_LINES, 'line-opacity', 0);
     map.setFilter(LYR_OVERLAY_LINES, null);
+    return;
   }
+
+  map.setFilter(LYR_OVERLAY_LINES, ['==', ['get', 'id'], selectedId]);
+  map.setPaintProperty(LYR_OVERLAY_LINES, 'line-opacity', 0.9);
 }

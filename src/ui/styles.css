@@ -8,6 +8,7 @@
 :root {
   --accent: #BDEFFC;
   --accent-hover: #9de8f9;
+  --on-accent: #000000;
   --ink: #0B1220;
   --muted: #6B7280;
   --bg: #FFFFFF;
@@ -203,7 +204,7 @@ html, body {
 
 .toolbar__btn--primary {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   font-size: 11px;
   font-weight: 600;
   width: 44px;
@@ -261,7 +262,7 @@ html, body {
 
 .mode-toggle__btn.active {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   font-weight: 600;
 }
 
@@ -315,12 +316,17 @@ html, body {
   border-radius: var(--r-md);
   margin-bottom: 10px;
   overflow: hidden;
-  transition: box-shadow var(--transition);
+  transition: box-shadow var(--transition), border-color var(--transition);
   cursor: pointer;
 }
 
 .course-card:hover {
   box-shadow: var(--shadow-card);
+  border-color: #C4E4F0;
+}
+
+.course-card:nth-child(odd) {
+  background: #FAFAFA;
 }
 
 .course-card__body {
@@ -338,7 +344,7 @@ html, body {
 .course-card__thumb-placeholder {
   width: 100%;
   height: 96px;
-  background: linear-gradient(135deg, #E5E7EB 0%, #F3F4F6 100%);
+  background: linear-gradient(135deg, #E8F7FC 0%, #F0FBFF 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -397,7 +403,7 @@ html, body {
 
 .btn--primary {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 .btn--primary:hover { background: var(--accent-hover); }
 
@@ -674,6 +680,90 @@ html, body {
 
 @media (min-width: 1024px) {
   .sheet { display: none !important; }
+}
+
+/* ─── Course Chips (map floating) ───────────────────────── */
+.chips-panel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 20;
+  background: var(--bg);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-toolbar);
+  max-width: 260px;
+  overflow: hidden;
+}
+
+.chips-tabbar {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+}
+
+.chips-tab {
+  flex: 1;
+  padding: 8px 6px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--transition), border-color var(--transition);
+  white-space: nowrap;
+}
+
+.chips-tab.active {
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+
+.chips-tab:not(.active):hover {
+  color: var(--ink);
+}
+
+.chips-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  max-height: 140px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.course-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  background: var(--bg);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  white-space: nowrap;
+}
+
+.course-chip:hover {
+  background: #F3F4F6;
+  border-color: #C4E4F0;
+}
+
+.course-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
 }
 
 /* ─── Reduced motion ─────────────────────────────────────── */

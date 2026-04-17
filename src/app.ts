@@ -6,12 +6,13 @@ import { initPointMode } from './draw/pointMode';
 import { initDragMode } from './draw/dragMode';
 import { drawStore } from './draw/drawStore';
 import { routeStore, getComposedLine, getPendingLines, getErrorLines } from './draw/routeComposer';
-import { setRoutingProvider } from './draw/routeComposer';
+import { setRoutingProvider, onSegmentErrorRemovePoint } from './draw/routeComposer';
 import { OrsClient } from './routing/orsClient';
 import { createToolbar } from './ui/toolbar';
 import { createModeToggle } from './ui/modeToggle';
 import { createBottomSheet } from './ui/sheet';
 import { initGallery } from './gallery/galleryView';
+import { createCourseChips } from './ui/courseChips';
 import { showToast } from './ui/toast';
 import coursesData from './gallery/courses.json';
 import type { Course } from './gallery/courses';
@@ -89,6 +90,9 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
   const courses = coursesData as unknown as Course[];
   initGallery(sidebarContent, courses);
 
+  // 코스 칩 버튼 (지도 위 플로팅)
+  createCourseChips(mapWrap, courses);
+
   // 오버레이 로드
   loadOverlay(courses);
 
@@ -129,6 +133,11 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
 
   drawStore.subscribe(syncMapLayers);
   routeStore.subscribe(() => syncMapLayers());
+
+  onSegmentErrorRemovePoint(toId => {
+    drawStore.removePoint(toId);
+    routeStore.removeSegmentsForPoint(toId);
+  });
 
   // 초기 동기화
   syncMapLayers();

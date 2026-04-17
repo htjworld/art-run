@@ -107,9 +107,14 @@ export const routeStore = createRouteStore();
 const abortControllers = new Map<string, AbortController>();
 
 let provider: RoutingProvider | null = null;
+let onErrorRemove: ((toId: string) => void) | null = null;
 
 export function setRoutingProvider(p: RoutingProvider): void {
   provider = p;
+}
+
+export function onSegmentErrorRemovePoint(cb: (toId: string) => void): void {
+  onErrorRemove = cb;
 }
 
 export function getComposedLine(points: Point[]): LineString | null {
@@ -235,17 +240,10 @@ async function routeSegments(pairs: [Point, Point][]): Promise<void> {
       });
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') return;
-      routeStore.setSegment({
-        key,
-        fromId: a.id,
-        toId: b.id,
-        line: { type: 'LineString', coordinates: [from, to] },
-        meters: 0,
-        status: 'error',
-      });
       if ((err as Error).message) {
         showToast((err as Error).message, 'error');
       }
+      setTimeout(() => onErrorRemove?.(b.id), 800);
     } finally {
       abortControllers.delete(key);
     }

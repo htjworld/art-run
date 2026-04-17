@@ -33,18 +33,8 @@ export const overlayLinesLayer: LineLayerSpecification = {
   layout: { 'line-cap': 'round', 'line-join': 'round' },
   paint: {
     'line-color': '#BDEFFC',
-    'line-width': [
-      'case',
-      ['boolean', ['feature-state', 'selected'], false],
-      5,
-      3,
-    ],
-    'line-opacity': [
-      'case',
-      ['boolean', ['feature-state', 'selected'], false],
-      0.85,
-      0.35,
-    ],
+    'line-width': 5,
+    'line-opacity': 0,
     'line-dasharray': [
       'case',
       ['==', ['get', 'type'], 'artrun'],

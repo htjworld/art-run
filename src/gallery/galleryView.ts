@@ -4,7 +4,7 @@ import { createTabs } from '../ui/tabs';
 import { triggerGpxDownload } from '../gpx/export';
 import { loadCourse } from './loadCourse';
 import { getMap } from '../map/mapView';
-import { setSelectedCourse } from '../map/overlay';
+import { showOnlyCourse } from '../map/overlay';
 
 let allCourses: Course[] = [];
 let onCourseSelect: ((id: string | null) => void) | null = null;
@@ -72,7 +72,7 @@ function createCard(course: Course): HTMLElement {
     li.appendChild(img);
   } else {
     const placeholder = el('div', { class: 'course-card__thumb-placeholder' });
-    placeholder.textContent = course.type === 'artrun' ? '🗺' : '🏃';
+    placeholder.textContent = course.type === 'artrun' ? '🎨' : '🏃';
     li.appendChild(placeholder);
   }
 
@@ -131,7 +131,7 @@ function createCard(course: Course): HTMLElement {
       duration: 1200,
       essential: true,
     });
-    setSelectedCourse(course.id);
+    showOnlyCourse(course.id);
     onCourseSelect?.(course.id);
   });
 
