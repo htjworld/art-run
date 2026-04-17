@@ -1,0 +1,18 @@
+node_modules
+dist
+.env.local
+.env.*.local
+*.local
+
+# Editor
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db

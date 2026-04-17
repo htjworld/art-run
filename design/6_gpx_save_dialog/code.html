@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Save GPX - ArtRun</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#6d627c",
+                        "surface-variant": "#dce2f6",
+                        "secondary-container": "#d0e3e8",
+                        "on-primary-container": "#3d6e79",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#2a3040",
+                        "on-secondary-container": "#54666a",
+                        "surface": "#f9f9ff",
+                        "tertiary-fixed-dim": "#cec1de",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#384a4e",
+                        "tertiary-fixed": "#ebddfb",
+                        "on-primary-fixed": "#001f25",
+                        "background": "#f9f9ff",
+                        "primary-fixed-dim": "#9dcedb",
+                        "tertiary-container": "#efe1ff",
+                        "surface-tint": "#346570",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#0c1e22",
+                        "surface-container": "#e9edff",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-highest": "#dce2f6",
+                        "secondary-fixed": "#d3e6eb",
+                        "primary": "#346570",
+                        "tertiary": "#645a73",
+                        "secondary": "#506166",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary-fixed-variant": "#4c435a",
+                        "surface-dim": "#d3daee",
+                        "on-surface-variant": "#40484a",
+                        "outline-variant": "#c0c8ca",
+                        "outline": "#70787b",
+                        "secondary-fixed-dim": "#b7cacf",
+                        "inverse-primary": "#9dcedb",
+                        "primary-container": "#bdeffc",
+                        "on-background": "#151b2a",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#184d58",
+                        "inverse-on-surface": "#edf0ff",
+                        "primary-fixed": "#b9ebf8",
+                        "on-tertiary-fixed": "#20182d",
+                        "on-surface": "#151b2a",
+                        "surface-container-high": "#e2e8fc",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    "boxShadow": {
+                        'ambient': '0 12px 32px rgba(11, 18, 32, 0.06)',
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background h-screen w-full relative overflow-hidden flex items-center justify-center">
+<!-- Simulated background content to show the overlay effect -->
+<div class="absolute inset-0 z-0 p-8 flex flex-col gap-6 opacity-30 pointer-events-none">
+<div class="h-16 w-full bg-surface-container-low rounded-xl"></div>
+<div class="h-64 w-full bg-surface-container rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-outline-variant" data-icon="map">map</span>
+</div>
+<div class="flex gap-4">
+<div class="h-24 w-1/3 bg-surface-container-high rounded-xl"></div>
+<div class="h-24 w-1/3 bg-surface-container-highest rounded-xl"></div>
+<div class="h-24 w-1/3 bg-primary-container rounded-xl"></div>
+</div>
+</div>
+<!-- Overlay Background (Dark 50% dimmed) -->
+<div class="fixed inset-0 bg-on-background/50 backdrop-blur-[2px] z-40 transition-opacity flex items-center justify-center p-4">
+<!-- Center Modal -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-ambient w-full max-w-md flex flex-col z-50 transform transition-all overflow-hidden border border-outline-variant/15">
+<!-- Modal Header -->
+<div class="px-6 py-5 flex items-center justify-between bg-surface-container-low/50">
+<h2 class="font-headline text-xl font-bold text-on-surface tracking-tight">Save GPX</h2>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none focus:ring-2 focus:ring-primary-container rounded-full p-1">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-6 flex flex-col gap-6">
+<!-- Input Field -->
+<div class="flex flex-col gap-2">
+<label class="font-label text-sm font-semibold text-on-surface-variant tracking-wider uppercase text-xs" for="courseName">Course Name</label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-outline">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</span>
+<input class="w-full bg-surface pl-10 pr-4 py-3 rounded-xl border-none text-on-surface font-body placeholder:text-outline focus:ring-2 focus:ring-primary-container focus:bg-surface-container-highest transition-colors shadow-sm text-base" id="courseName" placeholder="My ArtRun" type="text"/>
+</div>
+</div>
+<!-- Spacer -->
+<div class="h-4"></div>
+<!-- Toggle Switch -->
+<div class="flex items-start justify-between gap-4 p-4 rounded-xl bg-surface-container-low">
+<div class="flex flex-col gap-1">
+<span class="font-headline font-semibold text-on-surface text-base">Include Timestamps</span>
+<span class="font-body text-sm text-on-surface-variant leading-snug">Required for Strava to recognize as a route</span>
+</div>
+<!-- Custom Toggle (ON State) -->
+<button aria-checked="true" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-primary transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-offset-2 mt-1" role="switch" type="button">
+<span class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-container-lowest shadow ring-0 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="px-6 py-4 flex items-center justify-end gap-3 bg-surface-container-lowest border-t border-outline-variant/15">
+<button class="px-5 py-2.5 rounded-lg font-label font-semibold text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors focus:outline-none focus:ring-2 focus:ring-outline-variant bg-transparent border-[1.5px] border-transparent hover:border-outline-variant/30">
+                    Cancel
+                </button>
+<button class="px-6 py-2.5 rounded-lg font-label font-semibold bg-primary-container text-on-primary-fixed hover:bg-primary-fixed transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 border-b-[1.5px] border-primary/20 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="save">save</span>
+                    Save
+                </button>
+</div>
+</div>
+</div>
+</body></html>

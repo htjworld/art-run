@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ArtRun - Exploration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800;900&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#6d627c",
+                        "surface-variant": "#dce2f6",
+                        "secondary-container": "#d0e3e8",
+                        "on-primary-container": "#3d6e79",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#2a3040",
+                        "on-secondary-container": "#54666a",
+                        "surface": "#f9f9ff",
+                        "tertiary-fixed-dim": "#cec1de",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#384a4e",
+                        "tertiary-fixed": "#ebddfb",
+                        "on-primary-fixed": "#001f25",
+                        "background": "#f9f9ff",
+                        "primary-fixed-dim": "#9dcedb",
+                        "tertiary-container": "#efe1ff",
+                        "surface-tint": "#346570",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#0c1e22",
+                        "surface-container": "#e9edff",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-highest": "#dce2f6",
+                        "secondary-fixed": "#d3e6eb",
+                        "primary": "#346570",
+                        "tertiary": "#645a73",
+                        "secondary": "#506166",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary-fixed-variant": "#4c435a",
+                        "surface-dim": "#d3daee",
+                        "on-surface-variant": "#40484a",
+                        "outline-variant": "#c0c8ca",
+                        "outline": "#70787b",
+                        "secondary-fixed-dim": "#b7cacf",
+                        "inverse-primary": "#9dcedb",
+                        "primary-container": "#bdeffc",
+                        "on-background": "#151b2a",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#184d58",
+                        "inverse-on-surface": "#edf0ff",
+                        "primary-fixed": "#b9ebf8",
+                        "on-tertiary-fixed": "#20182d",
+                        "on-surface": "#151b2a",
+                        "surface-container-high": "#e2e8fc",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans", "sans-serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Hide scrollbar for a cleaner sketchbook look */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="font-body text-on-surface bg-background overflow-hidden h-screen w-screen flex antialiased selection:bg-primary-container selection:text-on-surface">
+<!-- Left Sidebar Content Panel -->
+<aside class="w-[320px] h-full bg-surface-container-lowest flex flex-col border-r border-outline-variant/15 z-20 relative shadow-[24px_0_32px_rgba(11,18,32,0.02)] shrink-0">
+<!-- Header / Brand Anchor -->
+<div class="px-6 pt-8 pb-6 shrink-0 flex items-center gap-3 bg-surface-container-lowest relative z-10">
+<span class="material-symbols-outlined text-[28px] text-primary" style="font-variation-settings: 'FILL' 1;">edit_road</span>
+<h1 class="font-headline text-[22px] font-black tracking-tight text-on-surface">ArtRun</h1>
+</div>
+<!-- Navigation Tabs -->
+<div class="px-6 flex gap-5 border-b border-outline-variant/15 shrink-0 bg-surface-container-lowest relative z-10">
+<button class="pb-3 text-[13px] font-semibold tracking-wider text-on-surface-variant hover:text-on-surface transition-colors flex-1 text-left">Popular Courses (6)</button>
+<button class="pb-3 text-[13px] font-bold tracking-wider text-on-surface border-b-[3px] border-primary-container flex-1 text-left relative">
+                Popular ArtRun (8)
+                <!-- Underline glow effect -->
+<div class="absolute bottom-[-3px] left-0 w-full h-[3px] bg-primary-container shadow-[0_0_8px_rgba(189,239,252,0.6)]"></div>
+</button>
+</div>
+<!-- Scrollable Card List (Tonal Nesting inside Surface Container Lowest) -->
+<div class="flex-1 overflow-y-auto hide-scrollbar px-5 py-6 flex flex-col gap-5 bg-surface/30">
+<!-- Card 1 -->
+<div class="bg-surface-container-low rounded-[12px] p-3.5 flex flex-col gap-3 transition-transform hover:-translate-y-1 duration-300 relative group cursor-pointer hover:shadow-[0_8px_24px_rgba(11,18,32,0.04)]">
+<!-- Top Row: Thumbnail + Info -->
+<div class="flex gap-3.5">
+<!-- Thumbnail with Map Halo logic -->
+<div class="w-[110px] h-[76px] shrink-0 rounded-lg overflow-hidden bg-surface-container-high border-[2px] border-surface-container-lowest relative">
+<img alt="Top-down satellite view of a green park surrounded by urban city blocks" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Top-down satellite view of a green park surrounded by urban city blocks" data-location="Seoul" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzJ9ZF8lBMIuISYzejHJ77Afv5gf6b_qmhNcTy-p5u1iBEWDgkO-HaIrKeto2PTv326VVvjs-q8d4yL-ud-EdZiU-4m-M5p1Tl8q1w5DmXTqN3ET9fpDFXLVIUsg5BCfEijjAJe2L2c-sss3AfBEMr4zix83bHNGtCuTM5r2rYu60vfvO3TkhRVKnEpQphP1gN6wOY_yaXMsvgM-32XyA1hIu8tLiqNK3Ddo-Qe694fjHVNwzrXypgOUr2B8BsOex2Z_fm8hlMaPw"/>
+<!-- Simulated drawing overlay -->
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+<svg fill="none" height="40" viewbox="0 0 60 40" width="60">
+<path d="M10 20 C 20 10, 40 30, 50 20" stroke="#FFFFFF" stroke-linecap="round" stroke-width="4"></path>
+<path d="M10 20 C 20 10, 40 30, 50 20" stroke="#BDEFFC" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+<!-- Text Info -->
+<div class="flex flex-col justify-start pt-0.5">
+<h3 class="font-headline font-bold text-[14px] text-on-surface leading-snug">Yeouido Sweet Potato Run</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 font-semibold tracking-wide">8.0km • Yeongdeungpo, Seoul</p>
+</div>
+</div>
+<!-- Description -->
+<p class="text-[12px] leading-relaxed text-on-surface-variant line-clamp-2 px-1">
+                    A fun, relatively flat route shaped exactly like a sweet potato around the Yeouido park area. Great for beginners!
+                </p>
+<!-- Actions -->
+<div class="flex justify-end gap-2.5 mt-1 pt-2 border-t border-outline-variant/10">
+<button class="px-3.5 py-1.5 rounded-[8px] text-[12px] font-bold border-[1.5px] border-on-surface text-on-surface hover:bg-surface-container-high transition-colors">Edit</button>
+<button class="px-3.5 py-1.5 rounded-[8px] text-[12px] font-bold bg-primary-container text-on-surface border-b-[1.5px] border-primary hover:brightness-95 transition-all shadow-sm">Save GPX</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-low rounded-[12px] p-3.5 flex flex-col gap-3 transition-transform hover:-translate-y-1 duration-300 relative group cursor-pointer hover:shadow-[0_8px_24px_rgba(11,18,32,0.04)]">
+<div class="flex gap-3.5">
+<div class="w-[110px] h-[76px] shrink-0 rounded-lg overflow-hidden bg-surface-container-high border-[2px] border-surface-container-lowest relative">
+<img alt="Aerial view of a curving river cutting through a dense metropolitan city skyline" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Aerial view of a curving river cutting through a dense metropolitan city skyline" data-location="Seoul" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfPmUtAv-C9Pp4VF5ltcsu2nd5l75z6MrWsdMmjmvLzQiQzTS14UfmvMnzpXQAd-MVcq9cvH1NZ3KQ0v6KI01CriW_e1Pkioe6AWxV9qap91X1yMh9_yFMX2Tc_RmEC6-RLWhCdAsqjEztPqX0MYqgZhclW55Lf9NeODPL8yfOyMZ7krTrF_CsVV8CaxRVnjFP_6JWPrBeVV5g-L5Nkssr4qw-_IwH7eQAkwvDzvs5BwlHGBFAA0c0RbxTbdvcpyqxlABoJQWeO-A"/>
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+<svg fill="none" height="40" viewbox="0 0 60 40" width="60">
+<path d="M15 10 L 45 10 L 45 30 L 15 30 Z" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path>
+<path d="M15 10 L 45 10 L 45 30 L 15 30 Z" stroke="#BDEFFC" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+<div class="flex flex-col justify-start pt-0.5">
+<h3 class="font-headline font-bold text-[14px] text-on-surface leading-snug">Han River Box Circuit</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 font-semibold tracking-wide">5.2km • Mapo-gu, Seoul</p>
+</div>
+</div>
+<p class="text-[12px] leading-relaxed text-on-surface-variant line-clamp-2 px-1">
+                    A technical route bridging two major crosswalks to form a perfect square. High traffic during evenings.
+                </p>
+<div class="flex justify-end gap-2.5 mt-1 pt-2 border-t border-outline-variant/10">
+<button class="px-3.5 py-1.5 rounded-[8px] text-[12px] font-bold border-[1.5px] border-on-surface text-on-surface hover:bg-surface-container-high transition-colors">Edit</button>
+<button class="px-3.5 py-1.5 rounded-[8px] text-[12px] font-bold bg-primary-container text-on-surface border-b-[1.5px] border-primary hover:brightness-95 transition-all shadow-sm">Save GPX</button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-low rounded-[12px] p-3.5 flex flex-col gap-3 transition-transform hover:-translate-y-1 duration-300 relative group cursor-pointer hover:shadow-[0_8px_24px_rgba(11,18,32,0.04)]">
+<div class="flex gap-3.5">
+<div class="w-[110px] h-[76px] shrink-0 rounded-lg overflow-hidden bg-surface-container-high border-[2px] border-surface-container-lowest relative">
+<img alt="Top-down view of winding mountainous roads surrounded by autumn foliage trees" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" data-alt="Top-down view of winding mountainous roads surrounded by autumn foliage trees" data-location="Seoul" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzOBLU1U6TTxQSzPz1SAjujRmV3g_Q-a1watM9nNi-baoB425QRFZ38-CnEbLu_UlQPDtDvbjm24_dPmDMZwAFUCBnqDwfCBETGvz5jDxa61Olmo5CQLLBiP0xCE89LuaDvS5sz97WknYlr0JgX5Orqqj98Zl-JkgUbRP92PS9er3R1R2I0-VdsNCiSt_t9HWHF8ZAJ4l6nJdH2jlt3zi4YvnjkNiyszq4EHEFRd9_6mXul0NZhxwzDvc8Is_WZNoKQ-RVPZBTIhU"/>
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+<svg fill="none" height="40" viewbox="0 0 60 40" width="60">
+<circle cx="30" cy="20" r="12" stroke="#FFFFFF" stroke-width="4"></circle>
+<circle cx="30" cy="20" r="12" stroke="#BDEFFC" stroke-width="2.5"></circle>
+</svg>
+</div>
+</div>
+<div class="flex flex-col justify-start pt-0.5">
+<h3 class="font-headline font-bold text-[14px] text-on-surface leading-snug">Namsan Donut Loop</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 font-semibold tracking-wide">12.4km • Yongsan, Seoul</p>
+</div>
+</div>
+<p class="text-[12px] leading-relaxed text-on-surface-variant line-clamp-2 px-1">
+                    Endurance trail with intense elevation. The path perfectly traces the outer ring road of the mountain.
+                </p>
+<div class="flex justify-end gap-2.5 mt-1 pt-2 border-t border-outline-variant/10">
+<button class="px-3.5 py-1.5 rounded-[8px] text-[12px] font-bold border-[1.5px] border-on-surface text-on-surface hover:bg-surface-container-high transition-colors">Edit</button>
+<button class="px-3.5 py-1.5 rounded-[8px] text-[12px] font-bold bg-primary-container text-on-surface border-b-[1.5px] border-primary hover:brightness-95 transition-all shadow-sm">Save GPX</button>
+</div>
+</div>
+</div>
+</aside>
+<!-- Map Canvas Area -->
+<main class="flex-1 h-full relative bg-surface-container-high overflow-hidden">
+<!-- Base Map Layer -->
+<img alt="Top-down view of a minimalist, light-themed stylized map with soft blue rivers and subtle white streets" class="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-multiply" data-alt="Top-down view of a minimalist, light-themed stylized map with soft blue rivers and subtle white streets" data-location="Seoul" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwnzP_gwsUR-7yMgmPt6bjFfgI8NPW3AH-4YqfUwMx667oUfUcWMHXAirZXBGMtxJz_V1ovPninkrg4Lk7JRlJbdhKtWEpImorqrmXWtO6n4swuiRxURBSLoiducgRM6yFf52I8VNKOe_FehUH2PTMk4SNZOGqOLnJLfVYiAS96AP6sDq97qP7U4aXnftzpuEaSlnJfoZ_zcUyutpNRnVELU5z0LUHO5KWdqcSu7uChD2nK7of90Bi-qTl5XH1HZSOmJwxmo9JWDU"/>
+<!-- Glassmorphism Vignette to soften the map and create a sketchbook feel -->
+<div class="absolute inset-0 bg-gradient-to-br from-surface/40 via-transparent to-surface/20 pointer-events-none"></div>
+<!-- The "Drawn" Route on Map (Demonstrating the Signature Halo) -->
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-90">
+<svg class="drop-shadow-lg" fill="none" height="400" viewbox="0 0 600 400" width="600">
+<!-- White Halo Base -->
+<path d="M 150 250 C 200 150, 300 350, 400 200 S 500 150, 550 250" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="14"></path>
+<!-- Primary Ink Path -->
+<path d="M 150 250 C 200 150, 300 350, 400 200 S 500 150, 550 250" stroke="#BDEFFC" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"></path>
+<!-- End point markers -->
+<circle cx="150" cy="250" fill="#FFFFFF" r="10"></circle>
+<circle cx="150" cy="250" fill="#0B1220" r="6"></circle>
+<circle cx="550" cy="250" fill="#FFFFFF" r="10"></circle>
+<circle cx="550" cy="250" fill="#0B1220" r="6"></circle>
+</svg>
+</div>
+<!-- Floating Toolbar (Top Right) -->
+<div class="absolute top-8 right-8 flex flex-col gap-3 z-10">
+<button class="w-[44px] h-[44px] bg-surface-container-lowest/85 backdrop-blur-md rounded-[12px] flex items-center justify-center text-on-surface shadow-[0_12px_32px_rgba(11,18,32,0.06)] hover:bg-surface-container-lowest transition-colors border border-outline-variant/15 group">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">layers</span>
+</button>
+<button class="w-[44px] h-[44px] bg-surface-container-lowest/85 backdrop-blur-md rounded-[12px] flex items-center justify-center text-on-surface shadow-[0_12px_32px_rgba(11,18,32,0.06)] hover:bg-surface-container-lowest transition-colors border border-outline-variant/15 group">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">my_location</span>
+</button>
+<button class="w-[44px] h-[44px] bg-surface-container-lowest/85 backdrop-blur-md rounded-[12px] flex items-center justify-center text-on-surface shadow-[0_12px_32px_rgba(11,18,32,0.06)] hover:bg-surface-container-lowest transition-colors border border-outline-variant/15 group mt-4">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">explore</span>
+</button>
+</div>
+<!-- Mode Toggle (Bottom Center) -->
+<div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center bg-surface-container-lowest/90 backdrop-blur-xl rounded-full p-1.5 shadow-[0_16px_40px_rgba(11,18,32,0.08)] border border-outline-variant/15 z-10">
+<button class="px-6 py-2.5 rounded-full text-[13px] font-bold bg-primary-container text-on-surface flex items-center gap-2 transition-all border-b-[1.5px] border-primary shadow-sm">
+<span class="material-symbols-outlined text-[18px]">explore</span>
+                Explore
+            </button>
+<button class="px-6 py-2.5 rounded-full text-[13px] font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low/60 flex items-center gap-2 transition-all border border-transparent">
+<span class="material-symbols-outlined text-[18px]">draw</span>
+                Draw
+            </button>
+</div>
+</main>
+</body></html>

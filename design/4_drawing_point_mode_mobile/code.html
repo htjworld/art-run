@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Drawing Mode - ArtRun</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#6d627c",
+                        "surface-variant": "#dce2f6",
+                        "secondary-container": "#d0e3e8",
+                        "on-primary-container": "#3d6e79",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#2a3040",
+                        "on-secondary-container": "#54666a",
+                        "surface": "#f9f9ff",
+                        "tertiary-fixed-dim": "#cec1de",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#384a4e",
+                        "tertiary-fixed": "#ebddfb",
+                        "on-primary-fixed": "#001f25",
+                        "background": "#f9f9ff",
+                        "primary-fixed-dim": "#9dcedb",
+                        "tertiary-container": "#efe1ff",
+                        "surface-tint": "#346570",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#0c1e22",
+                        "surface-container": "#e9edff",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-highest": "#dce2f6",
+                        "secondary-fixed": "#d3e6eb",
+                        "primary": "#346570",
+                        "tertiary": "#645a73",
+                        "secondary": "#506166",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary-fixed-variant": "#4c435a",
+                        "surface-dim": "#d3daee",
+                        "on-surface-variant": "#40484a",
+                        "outline-variant": "#c0c8ca",
+                        "outline": "#70787b",
+                        "secondary-fixed-dim": "#b7cacf",
+                        "inverse-primary": "#9dcedb",
+                        "primary-container": "#bdeffc",
+                        "on-background": "#151b2a",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#184d58",
+                        "inverse-on-surface": "#edf0ff",
+                        "primary-fixed": "#b9ebf8",
+                        "on-tertiary-fixed": "#20182d",
+                        "on-surface": "#151b2a",
+                        "surface-container-high": "#e2e8fc",
+                        "on-secondary": "#ffffff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans", "sans-serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body overflow-hidden select-none">
+<!-- Full Screen Canvas Map Area -->
+<main class="relative w-full h-[884px] bg-surface-container-low">
+<!-- Base Map Layer -->
+<div class="absolute inset-0 z-0 opacity-80 mix-blend-multiply">
+<img alt="Map View" class="w-full h-full object-cover" data-alt="Light colored minimalist street map view from top down showing city blocks and intersecting streets" data-location="Tokyo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGx8_0nWK3HCgHM-DpSe5ShLMsjn5b2zLHy6HotweFCMcsttTDamkBYxSSTsbrWRE5-NU8D7KNsCFS0lTOSwotnnF_8gODvPt0xkBdUQo7cXTNoNZ-_Q7GiQkRWpdDZWDCWHu73ojLuyE-dGsgOMlwdF4ZCXTvmf-j9AspSOsA7ksw5MileFdz4DE6Mzkr833QmkYrQUS6gGjuVxIfsYCrOnLpk01AhLCy5xc7SoDo1bKWC78wcRyf_doUTq-ugSEix3UOWLey1Fk"/>
+</div>
+<!-- Drawing Overlay (SVG Path) -->
+<!-- ViewBox roughly matches standard mobile aspect ratio to maintain stroke widths accurately across viewport -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none z-10 drop-shadow-md" preserveaspectratio="xMidYMid slice" viewbox="0 0 375 812">
+<!-- 1. The White Halo (2px total width = core 5px + 2px each side = 9px) -->
+<path d="M 75 250 L 150 160 L 260 320 L 225 480 L 110 440" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="9"></path>
+<!-- 2. The Core Route Line (5px #BDEFFC) -->
+<path class="stroke-primary-container" d="M 75 250 L 150 160 L 260 320 L 225 480 L 110 440" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"></path>
+<!-- 3. Calculating State (Dashed segment to current cursor) -->
+<path class="stroke-outline" d="M 110 440 L 170 600" fill="none" stroke-dasharray="6,8" stroke-linecap="round" stroke-width="2"></path>
+</svg>
+<!-- Interactive Markers Layer -->
+<div class="absolute inset-0 z-20 pointer-events-none">
+<!-- Point 1 -->
+<div class="absolute left-[20%] top-[30.8%] -ml-4 -mt-4 w-8 h-8 rounded-full bg-surface-container-lowest border-[1.5px] border-on-surface flex items-center justify-center shadow-sm pointer-events-auto active:scale-95 transition-transform">
+<div class="w-[22px] h-[22px] rounded-full bg-primary-container flex items-center justify-center font-headline font-bold text-on-surface text-[11px] leading-none">1</div>
+</div>
+<!-- Point 2 -->
+<div class="absolute left-[40%] top-[19.7%] -ml-4 -mt-4 w-8 h-8 rounded-full bg-surface-container-lowest border-[1.5px] border-on-surface flex items-center justify-center shadow-sm pointer-events-auto active:scale-95 transition-transform">
+<div class="w-[22px] h-[22px] rounded-full bg-primary-container flex items-center justify-center font-headline font-bold text-on-surface text-[11px] leading-none">2</div>
+</div>
+<!-- Point 3 -->
+<div class="absolute left-[69.3%] top-[39.4%] -ml-4 -mt-4 w-8 h-8 rounded-full bg-surface-container-lowest border-[1.5px] border-on-surface flex items-center justify-center shadow-sm pointer-events-auto active:scale-95 transition-transform">
+<div class="w-[22px] h-[22px] rounded-full bg-primary-container flex items-center justify-center font-headline font-bold text-on-surface text-[11px] leading-none">3</div>
+</div>
+<!-- Point 4 -->
+<div class="absolute left-[60%] top-[59.1%] -ml-4 -mt-4 w-8 h-8 rounded-full bg-surface-container-lowest border-[1.5px] border-on-surface flex items-center justify-center shadow-sm pointer-events-auto active:scale-95 transition-transform">
+<div class="w-[22px] h-[22px] rounded-full bg-primary-container flex items-center justify-center font-headline font-bold text-on-surface text-[11px] leading-none">4</div>
+</div>
+<!-- Point 5 (Last Placed) -->
+<div class="absolute left-[29.3%] top-[54.1%] -ml-4 -mt-4 w-8 h-8 rounded-full bg-surface-container-lowest border-[1.5px] border-on-surface flex items-center justify-center shadow-sm pointer-events-auto active:scale-95 transition-transform">
+<div class="w-[22px] h-[22px] rounded-full bg-primary-container flex items-center justify-center font-headline font-bold text-on-surface text-[11px] leading-none">5</div>
+</div>
+<!-- Target Cursor (Calculating Destination) -->
+<div class="absolute left-[45.3%] top-[73.8%] -ml-3 -mt-3 w-6 h-6 rounded-full bg-surface-container-lowest border border-outline flex items-center justify-center shadow-md">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+</div>
+</div>
+<!-- Floating Task Bar (Top) -->
+<header class="absolute top-0 left-0 w-full px-5 pt-14 pb-4 flex justify-between items-center z-50 pointer-events-none">
+<button class="w-12 h-12 rounded-full bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center shadow-sm border border-outline-variant/30 text-on-surface pointer-events-auto hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+<div class="flex gap-3 pointer-events-auto">
+<button class="w-12 h-12 rounded-full bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center shadow-sm border border-outline-variant/30 text-on-surface hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined">undo</span>
+</button>
+</div>
+</header>
+<!-- Active Context Toolbar (Bottom) -->
+<section class="absolute bottom-8 left-5 right-5 bg-surface-container-lowest/90 backdrop-blur-xl rounded-[24px] p-5 shadow-[0_12px_32px_rgba(11,18,32,0.06)] z-50 flex flex-col gap-5 border border-outline-variant/15">
+<!-- Mode Toggle (Segmented Control) -->
+<div class="flex p-1.5 bg-surface-container rounded-[16px] w-full">
+<!-- Active State -->
+<button class="flex-1 py-2.5 text-sm font-label font-bold text-on-surface bg-surface-container-lowest rounded-xl shadow-sm transition-all">
+                    Point
+                </button>
+<!-- Inactive States -->
+<button class="flex-1 py-2.5 text-sm font-label font-medium text-on-surface-variant hover:text-on-surface transition-colors">
+                    Line
+                </button>
+<button class="flex-1 py-2.5 text-sm font-label font-medium text-on-surface-variant hover:text-on-surface transition-colors">
+                    Freehand
+                </button>
+</div>
+<!-- Stats & Primary Action -->
+<div class="flex justify-between items-end px-1">
+<div class="flex flex-col">
+<span class="text-[11px] font-label font-bold tracking-widest text-outline uppercase">Distance</span>
+<div class="font-headline font-extrabold text-[40px] leading-none text-on-surface tracking-tight mt-1.5">
+                        2.8<span class="text-xl font-bold text-on-surface-variant tracking-normal ml-1">km</span>
+</div>
+</div>
+<!-- Primary CTA -->
+<button class="bg-primary-container text-on-surface font-label font-bold text-base px-6 py-3.5 rounded-xl border-b-[2px] border-primary flex items-center gap-2 shadow-sm transition-transform active:scale-[0.96]">
+                    GPX
+                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">download</span>
+</button>
+</div>
+</section>
+</main>
+</body></html>
