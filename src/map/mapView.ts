@@ -10,8 +10,8 @@ import {
   SRC_ERROR,
 } from './layers';
 
-const INITIAL_CENTER: [number, number] = [127.766, 36.2];
-const INITIAL_ZOOM = 6.5;
+const INITIAL_CENTER: [number, number] = [126.978, 37.566];
+const INITIAL_ZOOM = 12;
 
 function getMapStyle(): string {
   const mapKey = import.meta.env.VITE_MAP_KEY as string | undefined;
