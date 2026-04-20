@@ -45,31 +45,8 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
     flyToPoint(lng, lat, 13);
   }
 
-  // 위치 리스너는 한 번만 등록
+  startLocationWatch();
   onLocationUpdate((lng, lat) => setUserLocation(lng, lat));
-
-  // 권한 상태에 따라 watchPosition 시작
-  // - granted: 즉시 시작 (Chrome 재방문, 이전 허용)
-  // - prompt: change 이벤트로 대기 (Safari 자동 팝업 방지)
-  // - permissions API 없음 / 실패: 바로 시작 (구형 브라우저 fallback)
-  function tryStartWatch(): void {
-    startLocationWatch();
-  }
-
-  if (navigator.permissions) {
-    navigator.permissions.query({ name: 'geolocation' as PermissionName })
-      .then(result => {
-        if (result.state === 'granted') {
-          tryStartWatch();
-        }
-        result.addEventListener('change', () => {
-          if (result.state === 'granted') tryStartWatch();
-        });
-      })
-      .catch(() => tryStartWatch());
-  } else {
-    tryStartWatch();
-  }
 
   // 타이틀바 (모바일)
   const titlebar = document.createElement('div');
