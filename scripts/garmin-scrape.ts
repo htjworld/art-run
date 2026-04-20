@@ -46,46 +46,45 @@ function isInKorea(lat: number, lng: number): boolean {
   );
 }
 
-// 네트워크 인터셉트로 실제 API 엔드포인트 자동 감지
-async function detectApiBase(page: import('playwright').Page): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('API 감지 타임아웃')), 20000);
-
-    page.on('response', async response => {
-      const url = response.url();
-      // course 관련 API 응답 감지
-      if (url.includes('course') && url.includes('connect.garmin.com') && response.status() === 200) {
-        try {
-          const text = await response.text();
-          if (text.includes('courseId') || text.includes('courseName')) {
-            clearTimeout(timeout);
-            // base URL 추출: https://connect.garmin.com/xxxx-service/
-            const match = url.match(/(https:\/\/connect\.garmin\.com\/[^/]+-service)\//);
-            if (match) resolve(match[1]);
-          }
-        } catch { /* 무시 */ }
-      }
-    });
-  });
+// 네트워크 트래픽 스니핑 — 실제 API 호출 URL 로그
+async function sniffApiCalls(page: import('playwright').Page, durationMs: number): Promise<string[]> {
+  const found: string[] = [];
+  const handler = (response: import('playwright').Response) => {
+    const url = response.url();
+    if (url.includes('connect.garmin.com') && url.includes('course') && response.status() === 200) {
+      found.push(url);
+    }
+  };
+  page.on('response', handler);
+  await new Promise(r => setTimeout(r, durationMs));
+  page.off('response', handler);
+  return found;
 }
 
-async function fetchCourses(page: import('playwright').Page, apiBase: string, start = 0, limit = 100): Promise<GarminCourse[]> {
-  return page.evaluate(async ({ apiBase, start, limit }) => {
-    const url = `${apiBase}/course?start=${start}&limit=${limit}&courseType=running&sortField=POPULARITY&sortOrder=DESC`;
+async function fetchCoursesByUrl(page: import('playwright').Page, url: string): Promise<GarminCourse[]> {
+  return page.evaluate(async (url) => {
     const res = await fetch(url, { credentials: 'include' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    // 응답이 배열이거나 { courses: [...] } 형태일 수 있음
-    return Array.isArray(data) ? data : (data.courses ?? data.items ?? []);
-  }, { apiBase, start, limit });
+    return Array.isArray(data) ? data : (data.courses ?? data.items ?? data.results ?? []);
+  }, url);
 }
 
-async function fetchCourseDetail(page: import('playwright').Page, apiBase: string, courseId: number): Promise<{ startPoint?: { lat: number; lng: number } }> {
-  return page.evaluate(async ({ apiBase, courseId }) => {
-    const res = await fetch(`${apiBase}/course/${courseId}`, { credentials: 'include' });
-    if (!res.ok) return {};
-    return res.json();
-  }, { apiBase, courseId });
+async function searchNearby(page: import('playwright').Page, apiBase: string): Promise<GarminCourse[]> {
+  // 서울 중심 좌표로 반경 200km 내 러닝 코스 검색
+  const candidates = [
+    `${apiBase}/course/search/nearby?lat=37.5665&lng=126.9780&distance=200&unit=km&courseType=RUNNING&start=0&limit=100`,
+    `${apiBase}/course/search?lat=37.5665&lng=126.9780&distance=200000&courseType=RUNNING&start=0&limit=100`,
+    `${apiBase}/course?lat=37.5665&lng=126.9780&distance=200000&courseType=running&start=0&limit=100`,
+    `${apiBase}/course/search/nearby?lat=37.5665&lng=126.9780&distance=200000&courseType=running&sortField=POPULARITY&sortOrder=DESC&start=0&limit=100`,
+  ];
+  for (const url of candidates) {
+    try {
+      const result = await fetchCoursesByUrl(page, url);
+      if (result.length > 0) { console.log(`  성공: ${url}`); return result; }
+    } catch { /* 다음 시도 */ }
+  }
+  return [];
 }
 
 async function downloadGpx(page: import('playwright').Page, apiBase: string, courseId: number): Promise<string> {
@@ -142,78 +141,48 @@ async function main(): Promise<void> {
 
   await ask('\n✅ 브라우저에서 Garmin Connect 로그인 완료 후 Enter를 누르세요...');
 
-  // API 엔드포인트 자동 감지 — courses 페이지 로드 시 네트워크 요청 캡처
-  console.log('\n🔍 API 엔드포인트 감지 중... (courses 페이지 로딩)');
-  const apiBasePromise = detectApiBase(page);
+  // Courses 페이지로 이동하면서 네트워크 스니핑
+  console.log('\n🔍 Courses 페이지 로딩 + API 호출 스니핑 중... (5초)');
+  const sniffPromise = sniffApiCalls(page, 5000);
   await page.goto('https://connect.garmin.com/modern/courses');
+  const sniffed = await sniffPromise;
 
-  let apiBase: string;
-  try {
-    apiBase = await apiBasePromise;
-    console.log(`  감지됨: ${apiBase}`);
-  } catch {
-    // 폴백: 알려진 엔드포인트 목록 시도
-    console.log('  자동 감지 실패. 알려진 엔드포인트 시도 중...');
-    const candidates = [
-      'https://connect.garmin.com/course-service',
-      'https://connect.garmin.com/courseservice',
-      'https://connect.garmin.com/proxy/course-service',
-    ];
-    apiBase = '';
-    for (const candidate of candidates) {
-      try {
-        const status = await page.evaluate(async (url) => {
-          const res = await fetch(`${url}/course?start=0&limit=1`, { credentials: 'include' });
-          return res.status;
-        }, candidate);
-        if (status === 200) { apiBase = candidate; break; }
-      } catch { /* 다음 시도 */ }
-    }
-    if (!apiBase) {
-      console.error('❌ API 엔드포인트를 찾지 못했습니다.');
-      await context.close();
-      return;
-    }
-    console.log(`  사용: ${apiBase}`);
+  console.log('\n감지된 course API 호출:');
+  sniffed.forEach(u => console.log('  ', u));
+
+  // apiBase 결정
+  let apiBase = 'https://connect.garmin.com/proxy/course-service';
+  for (const u of sniffed) {
+    const m = u.match(/(https:\/\/connect\.garmin\.com\/(?:proxy\/)?[^/]+-service)/);
+    if (m) { apiBase = m[1]; break; }
   }
+  console.log(`\napiBase: ${apiBase}`);
 
-  console.log('\n📡 코스 목록 가져오는 중...');
-
-  const allCourses: GarminCourse[] = [];
-  for (let start = 0; start < 500; start += 100) {
-    try {
-      const batch = await fetchCourses(page, apiBase, start, 100);
-      if (!Array.isArray(batch) || batch.length === 0) break;
-      allCourses.push(...batch);
-      console.log(`  ${allCourses.length}개 수집됨...`);
-      if (batch.length < 100) break;
-    } catch (e) {
-      console.error(`  페이지 ${start} 오류:`, (e as Error).message);
-      break;
-    }
-  }
+  console.log('\n📡 서울 인근 러닝 코스 검색 중...');
+  const allCourses = await searchNearby(page, apiBase);
 
   if (allCourses.length === 0) {
-    console.error('코스를 하나도 가져오지 못했습니다. 로그인 상태를 확인하세요.');
+    console.log('\n⚠️  자동 검색 실패. 위의 스니핑된 URL을 확인하세요.');
+    console.log('감지된 URL이 있으면 개발자에게 공유해주세요.');
+    await ask('Enter를 누르면 종료합니다...');
     await context.close();
     return;
   }
 
   console.log(`\n총 ${allCourses.length}개 수집됨. 한국 코스 필터링 중...`);
 
-  const koreaCourses: GarminCourse[] = [];
-  for (const course of allCourses) {
-    try {
-      const detail = await fetchCourseDetail(page, apiBase, course.courseId);
-      const sp = detail.startPoint;
-      if (sp && isInKorea(sp.lat, sp.lng)) {
-        course.startPoint = sp;
-        koreaCourses.push(course);
-        console.log(`  🇰🇷 ${course.courseName} (${(course.distance / 1000).toFixed(1)}km)`);
-      }
-    } catch { /* 개별 실패 건너뜀 */ }
-    await new Promise(r => setTimeout(r, 150)); // rate limit 방지
-  }
+  // nearby 검색은 이미 한국 좌표로 필터링됐으므로 그대로 사용
+  // startPoint가 있는 경우 한국 여부 재확인, 없으면 포함
+  const koreaCourses: GarminCourse[] = allCourses.filter(course => {
+    const sp = course.startPoint;
+    if (!sp) return true; // 좌표 없으면 포함 (nearby 검색 결과라 이미 한국)
+    return isInKorea(sp.lat, sp.lng);
+  });
+
+  koreaCourses.forEach(c => {
+    const dist = c.distance ? `${(c.distance / 1000).toFixed(1)}km` : '?km';
+    console.log(`  🇰🇷 ${c.courseName} (${dist})`);
+  });
 
   if (koreaCourses.length === 0) {
     console.log('\n한국 코스를 찾지 못했습니다. 브라우저에서 직접 확인해보세요.');
