@@ -4,7 +4,7 @@ import { setDragOverlayActive } from '../draw/dragMode';
 
 const MODES: { id: DrawMode; label: string }[] = [
   { id: 'point', label: '점' },
-  { id: 'drag', label: '드래그' },
+  { id: 'draw', label: '그리기' },
   { id: 'idle', label: '선택' },
 ];
 
@@ -37,7 +37,7 @@ export function createModeToggle(container: HTMLElement): HTMLElement {
       btn.setAttribute('aria-pressed', String(m === mode));
     });
     // 드래그 오버레이 활성화
-    setDragOverlayActive(mode === 'drag');
+    setDragOverlayActive(mode === 'draw');
   }
 
   drawStore.subscribe(state => update(state.mode));

@@ -31,7 +31,7 @@ function metersBetween(a: LngLat, b: LngLat): number {
 }
 
 function onPointerDown(e: PointerEvent): void {
-  if (drawStore.getState().mode !== 'drag') return;
+  if (drawStore.getState().mode !== 'draw') return;
   e.preventDefault();
 
   const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();

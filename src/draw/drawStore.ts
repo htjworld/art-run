@@ -1,6 +1,6 @@
 import type { LngLat } from '../util/coord';
 
-export type DrawMode = 'idle' | 'point' | 'drag';
+export type DrawMode = 'idle' | 'point' | 'draw';
 
 export interface Point {
   id: string;
