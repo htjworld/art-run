@@ -61,7 +61,7 @@ export function createToolbar(container: HTMLElement): HTMLElement {
   distanceEl = el('span', { class: 'toolbar__distance', 'aria-live': 'polite' }, '0.0 km') as HTMLSpanElement;
 
   const gpxBtn = el('button', {
-    class: 'toolbar__btn toolbar__btn--primary',
+    class: 'toolbar__btn toolbar__btn--gpx',
     'aria-label': 'GPX 저장',
     title: 'GPX 저장',
     disabled: 'true',
@@ -110,7 +110,8 @@ export function createToolbar(container: HTMLElement): HTMLElement {
     const meters = state.totalMeters;
     distanceEl.textContent = meters > 0 ? formatDistanceShort(meters) : '0.0 km';
     const hasDone = [...state.segments.values()].some(s => s.status === 'done');
-    (gpxBtn as HTMLButtonElement).disabled = !hasDone;
+    gpxBtn.disabled = !hasDone;
+    gpxBtn.classList.toggle('active', hasDone);
   });
 
   return toolbar;

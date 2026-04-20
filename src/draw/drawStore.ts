@@ -19,7 +19,7 @@ type Listener = (state: DrawState) => void;
 
 function createDrawStore() {
   let state: DrawState = {
-    mode: 'point',
+    mode: 'idle',
     points: [],
     isDragging: false,
     dragCapture: [],

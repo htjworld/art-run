@@ -317,6 +317,33 @@ html, body {
   background: var(--accent-hover);
 }
 
+/* GPX 버튼: 항상 검정 텍스트, 경로 생성 시 터코이즈 배경으로 활성화 */
+.toolbar__btn--gpx {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 10px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+  color: var(--ink);
+}
+.toolbar__btn--gpx:not(:disabled):not(.active):hover {
+  background: #F3F4F6;
+}
+.toolbar__btn--gpx.active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.toolbar__btn--gpx.active:hover {
+  background: var(--accent-hover);
+}
+.toolbar__btn--gpx:disabled {
+  color: var(--ink);
+  cursor: default;
+}
+.toolbar__btn--gpx:disabled:hover {
+  background: none;
+}
+
 .toolbar__divider {
   width: 28px;
   height: 1px;
