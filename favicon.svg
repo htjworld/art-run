@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- 배경: 딥블랙 둥근 사각형 -->
+  <rect width="32" height="32" rx="7" fill="#242424"/>
+  <!-- 경로 "A": 왼쪽 다리 + 오른쪽 다리 -->
+  <polyline points="4,27 16,5 28,27" stroke="#BDEFFC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 크로스바 -->
+  <line x1="9.5" y1="17" x2="22.5" y2="17" stroke="#BDEFFC" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- 웨이포인트 도트 (앱 내 애니메이션 점과 동일한 스타일) -->
+  <circle cx="16" cy="5" r="3" fill="#BDEFFC" stroke="white" stroke-width="1.5"/>
+</svg>
