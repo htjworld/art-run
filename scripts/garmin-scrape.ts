@@ -72,19 +72,30 @@ async function downloadGpx(page: import('playwright').Page, courseId: number): P
 }
 
 async function main(): Promise<void> {
-  // 설치된 Chrome 사용 (봇 감지 우회) — 없으면 Chromium 폴백
-  let browser: import('playwright').Browser;
-  try {
-    browser = await chromium.launch({ channel: 'chrome', headless: false, slowMo: 50 });
-  } catch {
-    console.log('Chrome을 찾지 못해 Chromium으로 시도합니다...');
-    browser = await chromium.launch({ headless: false, slowMo: 50 });
-  }
+  // 실제 Chrome 프로필로 실행 — navigator.webdriver 감지 우회
+  const chromeUserData = process.env.CHROME_USER_DATA ??
+    `C:\\Users\\${process.env.USERNAME}\\AppData\\Local\\Google\\Chrome\\User Data`;
 
-  const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  console.log(`Chrome 프로필 경로: ${chromeUserData}`);
+  console.log('⚠️  실행 전 Chrome을 모두 닫아주세요!\n');
+  await ask('Chrome을 닫았으면 Enter를 눌러 계속하세요...');
+
+  const context = await chromium.launchPersistentContext(chromeUserData, {
+    channel: 'chrome',
+    headless: false,
+    slowMo: 50,
     locale: 'ko-KR',
     timezoneId: 'Asia/Seoul',
+    args: [
+      '--disable-blink-features=AutomationControlled',
+      '--no-first-run',
+      '--no-default-browser-check',
+    ],
+  });
+
+  // navigator.webdriver 숨기기
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
   });
   const page = await context.newPage();
 
@@ -122,7 +133,7 @@ async function main(): Promise<void> {
       allCourses = await fetchCourses(page, 0, 100);
     } catch {
       console.error('재시도도 실패. 로그인 상태를 확인해주세요.');
-      await browser.close();
+      await context.close();
       return;
     }
   }
@@ -147,7 +158,7 @@ async function main(): Promise<void> {
   if (koreaCourses.length === 0) {
     console.log('\n한국 코스를 찾지 못했습니다. 브라우저에서 직접 확인해보세요.');
     await ask('Enter를 누르면 종료합니다...');
-    await browser.close();
+    await context.close();
     return;
   }
 
@@ -220,7 +231,7 @@ async function main(): Promise<void> {
   console.log('\n🎉 완료! 이제 pnpm precompute 를 실행해 courses.json을 갱신하세요.\n');
   console.log('⚠️  저장된 .json 파일의 name, region, description을 한국어로 수정해주세요.');
 
-  await browser.close();
+  await context.close();
 }
 
 main().catch(err => {
