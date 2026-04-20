@@ -6,8 +6,7 @@ export type Op =
   | { t: 'move'; id: string; from: LngLat; to: LngLat }
   | { t: 'delete'; index: number; point: Point }
   | { t: 'dragBatch'; points: Point[] }
-  | { t: 'clear'; prev: Point[] }
-  | { t: 'loadCourse'; prev: Point[]; next: Point[] };
+  | { t: 'clear'; prev: Point[] };
 
 const MAX_HISTORY = 100;
 

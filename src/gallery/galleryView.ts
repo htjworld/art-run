@@ -2,7 +2,6 @@ import { el } from '../util/dom';
 import type { Course, CourseType } from './courses';
 import { createTabs } from '../ui/tabs';
 import { triggerGpxDownload } from '../gpx/export';
-import { loadCourse } from './loadCourse';
 import { flyToCourse } from '../map/mapView';
 import { showOnlyCourse } from '../map/overlay';
 import { startRouteAnimation, stopRouteAnimation } from '../map/routeAnimator';
@@ -168,12 +167,6 @@ function createCard(course: Course): HTMLElement {
 
   const actions = el('div', { class: 'course-card__actions' });
 
-  const editBtn = el('button', {
-    class: 'btn btn--secondary btn--sm',
-    'aria-label': `${course.name} 편집하기`,
-  }) as HTMLButtonElement;
-  editBtn.textContent = '편집하기';
-
   const gpxBtn = el('button', {
     class: 'btn btn--primary btn--sm',
     'aria-label': `${course.name} GPX 저장`,
@@ -182,18 +175,12 @@ function createCard(course: Course): HTMLElement {
 
   if (!course.route) gpxBtn.disabled = true;
 
-  editBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    loadCourse(course);
-  });
-
   gpxBtn.addEventListener('click', e => {
     e.stopPropagation();
     if (!course.route) return;
     void triggerGpxDownload(course.route, course.name, true);
   });
 
-  actions.appendChild(editBtn);
   actions.appendChild(gpxBtn);
 
   body.appendChild(name);

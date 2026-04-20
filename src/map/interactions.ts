@@ -159,10 +159,6 @@ function applyUndo(): void {
       drawStore.setPoints(op.prev);
       routeStore.clear();
       break;
-    case 'loadCourse':
-      drawStore.setPoints(op.prev);
-      routeStore.clear();
-      break;
   }
 }
 
@@ -187,10 +183,6 @@ function applyRedo(): void {
       break;
     case 'clear':
       drawStore.clear();
-      routeStore.clear();
-      break;
-    case 'loadCourse':
-      drawStore.setPoints(op.next);
       routeStore.clear();
       break;
   }
