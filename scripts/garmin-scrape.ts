@@ -135,60 +135,84 @@ async function main(): Promise<void> {
 
   const page = context.pages()[0] ?? await context.newPage();
 
-  console.log('\n🌐 Garmin Connect 로그인 페이지를 엽니다...');
-  await page.goto('https://connect.garmin.com/signin');
+  // 이미 로그인돼 있으면 바로 courses 페이지로
+  if (!page.url().includes('connect.garmin.com')) {
+    await page.goto('https://connect.garmin.com/modern/courses');
+  }
 
   await ask('\n✅ 브라우저에서 Garmin Connect 로그인 완료 후 Enter를 누르세요...');
 
-  // 로그인 확인
-  const currentUrl = page.url();
-  if (currentUrl.includes('signin')) {
-    await page.goto('https://connect.garmin.com/modern/courses');
-    await page.waitForTimeout(2000);
+  // API 엔드포인트 자동 감지 — courses 페이지 로드 시 네트워크 요청 캡처
+  console.log('\n🔍 API 엔드포인트 감지 중... (courses 페이지 로딩)');
+  const apiBasePromise = detectApiBase(page);
+  await page.goto('https://connect.garmin.com/modern/courses');
+
+  let apiBase: string;
+  try {
+    apiBase = await apiBasePromise;
+    console.log(`  감지됨: ${apiBase}`);
+  } catch {
+    // 폴백: 알려진 엔드포인트 목록 시도
+    console.log('  자동 감지 실패. 알려진 엔드포인트 시도 중...');
+    const candidates = [
+      'https://connect.garmin.com/course-service',
+      'https://connect.garmin.com/courseservice',
+      'https://connect.garmin.com/proxy/course-service',
+    ];
+    apiBase = '';
+    for (const candidate of candidates) {
+      try {
+        const status = await page.evaluate(async (url) => {
+          const res = await fetch(`${url}/course?start=0&limit=1`, { credentials: 'include' });
+          return res.status;
+        }, candidate);
+        if (status === 200) { apiBase = candidate; break; }
+      } catch { /* 다음 시도 */ }
+    }
+    if (!apiBase) {
+      console.error('❌ API 엔드포인트를 찾지 못했습니다.');
+      await context.close();
+      return;
+    }
+    console.log(`  사용: ${apiBase}`);
   }
 
   console.log('\n📡 코스 목록 가져오는 중...');
 
-  let allCourses: GarminCourse[] = [];
-  try {
-    // 최대 500개 시도
-    for (let start = 0; start < 500; start += 100) {
-      const batch = await fetchCourses(page, start, 100);
+  const allCourses: GarminCourse[] = [];
+  for (let start = 0; start < 500; start += 100) {
+    try {
+      const batch = await fetchCourses(page, apiBase, start, 100);
       if (!Array.isArray(batch) || batch.length === 0) break;
       allCourses.push(...batch);
-      console.log(`  ${allCourses.length}개 수집 중...`);
+      console.log(`  ${allCourses.length}개 수집됨...`);
       if (batch.length < 100) break;
-    }
-  } catch (e) {
-    console.error('코스 목록 API 오류:', e);
-    console.log('수동으로 courses 페이지로 이동 중...');
-    await page.goto('https://connect.garmin.com/modern/courses');
-    await page.waitForTimeout(3000);
-    // 재시도
-    try {
-      allCourses = await fetchCourses(page, 0, 100);
-    } catch {
-      console.error('재시도도 실패. 로그인 상태를 확인해주세요.');
-      await context.close();
-      return;
+    } catch (e) {
+      console.error(`  페이지 ${start} 오류:`, (e as Error).message);
+      break;
     }
   }
 
-  console.log(`\n총 ${allCourses.length}개 코스 수집됨. 한국 코스 필터링 중...`);
+  if (allCourses.length === 0) {
+    console.error('코스를 하나도 가져오지 못했습니다. 로그인 상태를 확인하세요.');
+    await context.close();
+    return;
+  }
 
-  // 한국 코스 필터링 — startPoint 좌표 확인
+  console.log(`\n총 ${allCourses.length}개 수집됨. 한국 코스 필터링 중...`);
+
   const koreaCourses: GarminCourse[] = [];
   for (const course of allCourses) {
     try {
-      const detail = await fetchCourseDetail(page, course.courseId);
+      const detail = await fetchCourseDetail(page, apiBase, course.courseId);
       const sp = detail.startPoint;
       if (sp && isInKorea(sp.lat, sp.lng)) {
         course.startPoint = sp;
         koreaCourses.push(course);
         console.log(`  🇰🇷 ${course.courseName} (${(course.distance / 1000).toFixed(1)}km)`);
       }
-    } catch { /* 개별 실패는 건너뜀 */ }
-    await page.waitForTimeout(200); // rate limit 방지
+    } catch { /* 개별 실패 건너뜀 */ }
+    await new Promise(r => setTimeout(r, 150)); // rate limit 방지
   }
 
   if (koreaCourses.length === 0) {
@@ -207,13 +231,12 @@ async function main(): Promise<void> {
   console.log('  예) 1,3,5  또는  all (전체)');
   const selection = await ask('> ');
 
-  let selected: GarminCourse[] = [];
-  if (selection.toLowerCase() === 'all') {
-    selected = koreaCourses;
-  } else {
-    const indices = selection.split(',').map(s => parseInt(s.trim(), 10) - 1).filter(i => i >= 0 && i < koreaCourses.length);
-    selected = indices.map(i => koreaCourses[i]);
-  }
+  const selected: GarminCourse[] = selection.toLowerCase() === 'all'
+    ? koreaCourses
+    : selection.split(',')
+        .map(s => parseInt(s.trim(), 10) - 1)
+        .filter(i => i >= 0 && i < koreaCourses.length)
+        .map(i => koreaCourses[i]);
 
   console.log(`\n📥 ${selected.length}개 코스 GPX 다운로드 시작...\n`);
 
@@ -222,50 +245,43 @@ async function main(): Promise<void> {
     const courseType = typeAnswer === '2' ? 'artrun' : 'scenic';
     const dir = courseType === 'artrun' ? ARTRUN_DIR : SCENIC_DIR;
 
-    // ID 생성 (영문 변환이 어려우므로 garmin- 접두사 + courseId 사용)
     const safeName = toKebab(course.courseName);
     const id = safeName || `garmin-${course.courseId}`;
-
     const gpxPath = join(dir, `${id}.gpx`);
     const jsonPath = join(dir, `${id}.json`);
 
     if (existsSync(gpxPath)) {
       const overwrite = await ask(`  ⚠️  ${id}.gpx 이미 존재합니다. 덮어쓰기? (y/N): `);
-      if (overwrite.toLowerCase() !== 'y') {
-        console.log(`  건너뜀: ${id}`);
-        continue;
-      }
+      if (overwrite.toLowerCase() !== 'y') { console.log(`  건너뜀: ${id}`); continue; }
     }
 
     try {
-      const gpxContent = await downloadGpx(page, course.courseId);
+      const gpxContent = await downloadGpx(page, apiBase, course.courseId);
       writeFileSync(gpxPath, gpxContent, 'utf-8');
 
-      // 사이드카 JSON (메타 기본값)
       if (!existsSync(jsonPath)) {
         const distKm = (course.distance / 1000).toFixed(1);
-        const meta = {
+        writeFileSync(jsonPath, JSON.stringify({
           name: course.courseName,
           region: '한국',
           description: `${distKm}km 러닝 코스.`,
           thumbnail: '',
           center: course.startPoint ? [course.startPoint.lng, course.startPoint.lat] : undefined,
           zoom: 14,
-        };
-        writeFileSync(jsonPath, JSON.stringify(meta, null, 2), 'utf-8');
+        }, null, 2), 'utf-8');
         console.log(`  ✅ ${id}.gpx + .json 저장됨`);
       } else {
-        console.log(`  ✅ ${id}.gpx 저장됨 (JSON은 이미 존재)`);
+        console.log(`  ✅ ${id}.gpx 저장됨`);
       }
     } catch (e) {
       console.error(`  ❌ ${course.courseName} 실패:`, (e as Error).message);
     }
 
-    await page.waitForTimeout(500);
+    await new Promise(r => setTimeout(r, 500));
   }
 
-  console.log('\n🎉 완료! 이제 pnpm precompute 를 실행해 courses.json을 갱신하세요.\n');
-  console.log('⚠️  저장된 .json 파일의 name, region, description을 한국어로 수정해주세요.');
+  console.log('\n🎉 완료! pnpm precompute 로 courses.json을 갱신하세요.');
+  console.log('⚠️  .json 파일의 name, region, description을 한국어로 수정해주세요.\n');
 
   await context.close();
 }
