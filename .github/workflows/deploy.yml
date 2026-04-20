@@ -39,6 +39,7 @@ jobs:
         env:
           VITE_ORS_KEY: ${{ secrets.VITE_ORS_KEY }}
           VITE_MAP_KEY: ${{ secrets.VITE_MAP_KEY }}
+          VITE_KAKAO_KEY: ${{ secrets.VITE_KAKAO_KEY }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
