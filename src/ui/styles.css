@@ -334,6 +334,11 @@ html, body {
   border-color: #C4E4F0;
 }
 
+.course-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(189, 239, 252, 0.5);
+}
+
 .course-card:nth-child(odd) {
   background: #FAFAFA;
 }

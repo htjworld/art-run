@@ -5,10 +5,11 @@ import { triggerGpxDownload } from '../gpx/export';
 import { loadCourse } from './loadCourse';
 import { flyToCourse } from '../map/mapView';
 import { showOnlyCourse } from '../map/overlay';
-import { startRouteAnimation } from '../map/routeAnimator';
+import { startRouteAnimation, stopRouteAnimation } from '../map/routeAnimator';
 
 let allCourses: Course[] = [];
 let onCourseSelect: ((id: string | null) => void) | null = null;
+let selectedId: string | null = null;
 
 export function initGallery(
   container: HTMLElement,
@@ -124,10 +125,21 @@ function createCard(course: Course): HTMLElement {
   li.appendChild(body);
 
   li.addEventListener('click', () => {
-    flyToCourse(course);
-    showOnlyCourse(course.id);
-    if (course.route) startRouteAnimation(course.route);
-    onCourseSelect?.(course.id);
+    if (selectedId === course.id) {
+      selectedId = null;
+      showOnlyCourse(null);
+      stopRouteAnimation();
+      li.classList.remove('active');
+      onCourseSelect?.(null);
+    } else {
+      document.querySelectorAll('.course-card.active').forEach(el => el.classList.remove('active'));
+      selectedId = course.id;
+      li.classList.add('active');
+      flyToCourse(course);
+      showOnlyCourse(course.id);
+      if (course.route) startRouteAnimation(course.route);
+      onCourseSelect?.(course.id);
+    }
   });
 
   return li;
