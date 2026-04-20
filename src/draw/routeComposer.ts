@@ -24,6 +24,7 @@ export interface Segment {
   line: LineString;
   meters: number;
   status: 'done' | 'error';
+  source?: 'ors' | 'draw';
 }
 
 export interface RouteState {
@@ -123,6 +124,63 @@ export function setRoutingProvider(p: RoutingProvider): void {
   provider = p;
 }
 
+function haversineMeters(coords: LngLat[]): number {
+  let total = 0;
+  for (let i = 1; i < coords.length; i++) {
+    const [lng1, lat1] = coords[i - 1];
+    const [lng2, lat2] = coords[i];
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2
+      + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    total += 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+  return total;
+}
+
+export function setDrawnSegment(from: Point, to: Point, coords: LngLat[]): void {
+  const key = coordKey([from.lng, from.lat], [to.lng, to.lat]);
+  routeStore.setSegment({
+    key,
+    fromId: from.id,
+    toId: to.id,
+    line: { type: 'LineString', coordinates: coords },
+    meters: haversineMeters(coords),
+    status: 'done',
+    source: 'draw',
+  });
+}
+
+export async function routePair(from: Point, to: Point): Promise<void> {
+  await routeSegments([[from, to]]);
+}
+
+/** 완성된 세그먼트를 부분적으로 모아 표시 (ORS 계산 중에도 기존 경로 유지) */
+export function getPartialLines(points: Point[]): LineString[] {
+  if (points.length < 2) return [];
+  const { segments } = routeStore.getState();
+  const lines: LineString[] = [];
+  let current: [number, number][] = [];
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const key = coordKey(
+      [points[i].lng, points[i].lat],
+      [points[i + 1].lng, points[i + 1].lat],
+    );
+    const seg = segments.get(key);
+    if (seg?.status === 'done') {
+      const segCoords = seg.line.coordinates as [number, number][];
+      if (current.length === 0) current = [...segCoords];
+      else current.push(...segCoords.slice(1));
+    } else {
+      if (current.length >= 2) lines.push({ type: 'LineString', coordinates: current });
+      current = [];
+    }
+  }
+  if (current.length >= 2) lines.push({ type: 'LineString', coordinates: current });
+  return lines;
+}
+
 export function getComposedLine(points: Point[]): LineString | null {
   if (points.length < 2) return null;
   const coords: [number, number][] = [];
@@ -211,9 +269,17 @@ export async function recomputeAll(points: Point[]): Promise<void> {
 async function routeSegments(pairs: [Point, Point][]): Promise<void> {
   if (!provider) return;
 
+  // 직접 그린 세그먼트는 ORS 재계산에서 제외
+  const { segments: existing } = routeStore.getState();
+  const toRoute = pairs.filter(([a, b]) => {
+    const key = coordKey([a.lng, a.lat], [b.lng, b.lat]);
+    return existing.get(key)?.source !== 'draw';
+  });
+  if (toRoute.length === 0) return;
+
   // 이전 요청 취소
   for (const [key, ctrl] of abortControllers) {
-    for (const [a, b] of pairs) {
+    for (const [a, b] of toRoute) {
       const k = coordKey([a.lng, a.lat], [b.lng, b.lat]);
       if (key === k) {
         ctrl.abort();
@@ -223,7 +289,7 @@ async function routeSegments(pairs: [Point, Point][]): Promise<void> {
   }
 
   // 병렬 실행 (MAX_PARALLEL 제한)
-  const queue = [...pairs];
+  const queue = [...toRoute];
 
   async function processOne(a: Point, b: Point): Promise<void> {
     const from: LngLat = [a.lng, a.lat];

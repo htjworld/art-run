@@ -12,7 +12,7 @@ import {
 } from '../draw/pointMode';
 import { drawStore } from '../draw/drawStore';
 import { undoStack } from '../draw/undoStack';
-import { routeStore } from '../draw/routeComposer';
+import { routeStore, setDrawnSegment, routePair } from '../draw/routeComposer';
 import bbox from '@turf/bbox';
 import { showToast } from '../ui/toast';
 import { getComposedLine } from '../draw/routeComposer';
@@ -155,6 +155,15 @@ function applyUndo(): void {
       drawStore.setPoints([]);
       routeStore.clear();
       break;
+    case 'drawBatch': {
+      const pts = drawStore.getState().points.filter(
+        p => p.id !== op.startPoint.id && p.id !== op.endPoint.id,
+      );
+      drawStore.setPoints(pts);
+      routeStore.removeSegmentsForPoint(op.startPoint.id);
+      routeStore.removeSegmentsForPoint(op.endPoint.id);
+      break;
+    }
     case 'clear':
       drawStore.setPoints(op.prev);
       routeStore.clear();
@@ -181,6 +190,16 @@ function applyRedo(): void {
       drawStore.setPoints(op.points);
       routeStore.clear();
       break;
+    case 'drawBatch': {
+      const currentPts = drawStore.getState().points;
+      drawStore.setPoints([...currentPts, op.startPoint, op.endPoint]);
+      setDrawnSegment(op.startPoint, op.endPoint, op.drawnCoords);
+      if (op.prevPointId) {
+        const prev = currentPts.find(p => p.id === op.prevPointId);
+        if (prev) void routePair(prev, op.startPoint);
+      }
+      break;
+    }
     case 'clear':
       drawStore.clear();
       routeStore.clear();

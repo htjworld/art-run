@@ -13,7 +13,6 @@ let userPos: [number, number] | null = null; // [lng, lat]
 
 type GalleryEntry = { container: HTMLElement; listContainer: HTMLElement };
 const galleries: GalleryEntry[] = [];
-let geoStarted = false;
 
 function distKmTo(course: Course): number {
   if (!userPos) return Infinity;
@@ -72,19 +71,6 @@ export function initGallery(
   renderList(listContainer, 'artrun');
 
   galleries.push({ container, listContainer });
-
-  // 위치 권한 요청: 첫 initGallery 호출 시 한 번만 등록, 응답 시 모든 갤러리 재정렬
-  if (!geoStarted && navigator.geolocation) {
-    geoStarted = true;
-    navigator.geolocation.getCurrentPosition(pos => {
-      userPos = [pos.coords.longitude, pos.coords.latitude];
-      for (const { container: c, listContainer: lc } of galleries) {
-        const activeTab = (c.querySelector('.tabs__btn.active') as HTMLElement | null)
-          ?.dataset.tab as CourseType | undefined;
-        renderList(lc, activeTab ?? 'artrun');
-      }
-    }, () => { /* 거부 시 기본 순서 유지 */ }, { timeout: 10000 });
-  }
 }
 
 function renderList(container: HTMLElement, type: CourseType): void {

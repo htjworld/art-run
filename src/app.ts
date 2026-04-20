@@ -1,23 +1,20 @@
 import './ui/styles.css';
-import { initMap, updateRouteSource, updatePendingSource, updateErrorSource, updatePointsSource, resizeMap } from './map/mapView';
+import { initMap, updateRouteSource, updatePendingSource, updateErrorSource, updatePointsSource, resizeMap, flyToPoint } from './map/mapView';
 import { initInteractions } from './map/interactions';
-import { loadOverlay } from './map/overlay';
-import { initRouteAnimator } from './map/routeAnimator';
+import { loadOverlay, showOnlyCourse } from './map/overlay';
+import { initRouteAnimator, stopRouteAnimation } from './map/routeAnimator';
 import { initPointMode } from './draw/pointMode';
 import { initDragMode } from './draw/dragMode';
 import { drawStore } from './draw/drawStore';
-import { routeStore, getComposedLine, getPendingLines, getErrorLines } from './draw/routeComposer';
-import { setRoutingProvider } from './draw/routeComposer';
+import { routeStore, getPartialLines, getPendingLines, getErrorLines, setRoutingProvider } from './draw/routeComposer';
 import { OrsClient } from './routing/orsClient';
 import { createToolbar } from './ui/toolbar';
 import { createModeToggle } from './ui/modeToggle';
-import { initGallery, clearGallerySelection } from './gallery/galleryView';
+import { initGallery, clearGallerySelection, setUserLocation } from './gallery/galleryView';
 import { createLocationSearch } from './ui/locationSearch';
 import { createCourseChips } from './ui/courseChips';
 import { showToast } from './ui/toast';
-import { showOnlyCourse } from './map/overlay';
-import { stopRouteAnimation } from './map/routeAnimator';
-import { flyToPoint } from './map/mapView';
+import { startLocationWatch, getLastPosition, onLocationUpdate } from './util/userLocation';
 import coursesData from './gallery/courses.json';
 import type { Course } from './gallery/courses';
 import logoUrl from '../assets/logo.png';
@@ -35,7 +32,6 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
   rootEl.innerHTML = '';
 
   // 초기화 함수 — 로고 클릭 시 호출
-  let lastKnownPos: [number, number] | null = null;
   const DEFAULT_CENTER: [number, number] = [126.9784, 37.5665];
 
   function resetAll(): void {
@@ -44,16 +40,14 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
     clearGallerySelection();
     showOnlyCourse(null);
     stopRouteAnimation();
-    const [lng, lat] = lastKnownPos ?? DEFAULT_CENTER;
+    const pos = getLastPosition();
+    const [lng, lat] = pos ?? DEFAULT_CENTER;
     flyToPoint(lng, lat, 13);
   }
 
-  // 위치 추적 (초기화 시 fly 대상으로 사용)
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(pos => {
-      lastKnownPos = [pos.coords.longitude, pos.coords.latitude];
-    }, () => {}, { timeout: 10000 });
-  }
+  // watchPosition: 사파리 포함 모든 브라우저에서 나중에 허용해도 동작
+  startLocationWatch();
+  onLocationUpdate((lng, lat) => setUserLocation(lng, lat));
 
   // 타이틀바 (모바일)
   const titlebar = document.createElement('div');
@@ -168,9 +162,8 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
     // 점 마커
     updatePointsSource(points);
 
-    // 완료된 경로
-    const composed = getComposedLine(points);
-    updateRouteSource(composed ? [composed] : []);
+    // 완료된 경로 (부분 완성 포함 — ORS 계산 중에도 기존 구간 유지)
+    updateRouteSource(getPartialLines(points));
 
     // 펜딩 (직선 점선)
     const pendingLines = getPendingLines(points, dragCapture);

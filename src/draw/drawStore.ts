@@ -82,8 +82,13 @@ function createDrawStore() {
       notify();
     },
 
+    setDragCapture(coords: LngLat[]): void {
+      state = { ...state, dragCapture: [...coords] };
+      notify();
+    },
+
     endDrag(): void {
-      state = { ...state, isDragging: false };
+      state = { ...state, isDragging: false, dragCapture: [] };
       notify();
     },
   };
