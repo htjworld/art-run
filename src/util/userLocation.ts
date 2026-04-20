@@ -1,12 +1,19 @@
 type LocationCallback = (lng: number, lat: number) => void;
 
+let watchId: number | null = null;
 let currentPos: [number, number] | null = null;
 const listeners = new Set<LocationCallback>();
 
-/** GeolocateControl 등 사용자 제스처로 얻은 위치를 모듈에 반영 */
-export function updatePosition(lng: number, lat: number): void {
-  currentPos = [lng, lat];
-  listeners.forEach(fn => fn(lng, lat));
+export function startLocationWatch(): void {
+  if (!navigator.geolocation || watchId !== null) return;
+  watchId = navigator.geolocation.watchPosition(
+    pos => {
+      currentPos = [pos.coords.longitude, pos.coords.latitude];
+      listeners.forEach(fn => fn(currentPos![0], currentPos![1]));
+    },
+    () => {},
+    { enableHighAccuracy: false, maximumAge: 30000 },
+  );
 }
 
 export function getLastPosition(): [number, number] | null {

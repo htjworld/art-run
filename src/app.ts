@@ -1,5 +1,5 @@
 import './ui/styles.css';
-import { initMap, updateRouteSource, updatePendingSource, updateErrorSource, updatePointsSource, resizeMap, flyToPoint, onGeolocate } from './map/mapView';
+import { initMap, updateRouteSource, updatePendingSource, updateErrorSource, updatePointsSource, resizeMap, flyToPoint } from './map/mapView';
 import { initInteractions } from './map/interactions';
 import { loadOverlay, showOnlyCourse } from './map/overlay';
 import { initRouteAnimator, stopRouteAnimation } from './map/routeAnimator';
@@ -14,7 +14,7 @@ import { initGallery, clearGallerySelection, setUserLocation } from './gallery/g
 import { createLocationSearch } from './ui/locationSearch';
 import { createCourseChips } from './ui/courseChips';
 import { showToast } from './ui/toast';
-import { updatePosition, getLastPosition } from './util/userLocation';
+import { startLocationWatch, getLastPosition, onLocationUpdate } from './util/userLocation';
 import coursesData from './gallery/courses.json';
 import type { Course } from './gallery/courses';
 import logoUrl from '../assets/logo.png';
@@ -45,12 +45,24 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
     flyToPoint(lng, lat, 13);
   }
 
-  // GeolocateControl 클릭(사용자 제스처)으로만 위치 요청 — 자동 요청 없음
-  // 자동 watchPosition 제거: Safari는 제스처 없는 자동 요청을 거부하면 이후 재요청 불가
-  onGeolocate((lng, lat) => {
-    updatePosition(lng, lat);
-    setUserLocation(lng, lat);
-  });
+  // 위치 권한 상태를 확인해 자동 시작 결정
+  // - 이미 허용(granted): 즉시 watchPosition 시작 → Chrome 재방문 등 정상 동작
+  // - 허용 전(prompt): 자동 요청하지 않음 → 사용자가 locate 버튼 클릭 후 허용 시 change 이벤트로 시작
+  // - Safari 등 permissions API 미지원: 조용히 skip
+  if (navigator.permissions) {
+    navigator.permissions.query({ name: 'geolocation' as PermissionName })
+      .then(result => {
+        function tryStart(): void {
+          if (result.state === 'granted') {
+            startLocationWatch();
+            onLocationUpdate((lng, lat) => setUserLocation(lng, lat));
+          }
+        }
+        tryStart();
+        result.addEventListener('change', tryStart);
+      })
+      .catch(() => {});
+  }
 
   // 타이틀바 (모바일)
   const titlebar = document.createElement('div');

@@ -22,14 +22,6 @@ function getMapStyle(): string {
   return 'https://tiles.openfreemap.org/styles/liberty';
 }
 
-type GeolocateCallback = (lng: number, lat: number) => void;
-const geolocateListeners = new Set<GeolocateCallback>();
-
-export function onGeolocate(fn: GeolocateCallback): () => void {
-  geolocateListeners.add(fn);
-  return () => geolocateListeners.delete(fn);
-}
-
 let mapInstance: Map | null = null;
 
 export function getMap(): Map {
@@ -61,15 +53,14 @@ export async function initMap(container: HTMLElement): Promise<Map> {
     'bottom-right'
   );
 
-  const geolocateCtrl = new maplibregl.GeolocateControl({
-    positionOptions: { enableHighAccuracy: true },
-    trackUserLocation: false,
-    showAccuracyCircle: false,
-  });
-  geolocateCtrl.on('geolocate', (e: GeolocationPosition) => {
-    geolocateListeners.forEach(fn => fn(e.coords.longitude, e.coords.latitude));
-  });
-  map.addControl(geolocateCtrl, 'bottom-right');
+  map.addControl(
+    new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: false,
+      showAccuracyCircle: false,
+    }),
+    'bottom-right',
+  );
 
   await new Promise<void>((resolve, reject) => {
     map.once('load', () => resolve());
