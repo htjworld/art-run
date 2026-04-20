@@ -46,29 +46,54 @@ function isInKorea(lat: number, lng: number): boolean {
   );
 }
 
-async function fetchCourses(page: import('playwright').Page, start = 0, limit = 100): Promise<GarminCourse[]> {
-  return page.evaluate(async ({ start, limit }) => {
-    const url = `/course-service/course?start=${start}&limit=${limit}&courseType=running&sortField=POPULARITY&sortOrder=DESC`;
+// 네트워크 인터셉트로 실제 API 엔드포인트 자동 감지
+async function detectApiBase(page: import('playwright').Page): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error('API 감지 타임아웃')), 20000);
+
+    page.on('response', async response => {
+      const url = response.url();
+      // course 관련 API 응답 감지
+      if (url.includes('course') && url.includes('connect.garmin.com') && response.status() === 200) {
+        try {
+          const text = await response.text();
+          if (text.includes('courseId') || text.includes('courseName')) {
+            clearTimeout(timeout);
+            // base URL 추출: https://connect.garmin.com/xxxx-service/
+            const match = url.match(/(https:\/\/connect\.garmin\.com\/[^/]+-service)\//);
+            if (match) resolve(match[1]);
+          }
+        } catch { /* 무시 */ }
+      }
+    });
+  });
+}
+
+async function fetchCourses(page: import('playwright').Page, apiBase: string, start = 0, limit = 100): Promise<GarminCourse[]> {
+  return page.evaluate(async ({ apiBase, start, limit }) => {
+    const url = `${apiBase}/course?start=${start}&limit=${limit}&courseType=running&sortField=POPULARITY&sortOrder=DESC`;
     const res = await fetch(url, { credentials: 'include' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  }, { start, limit });
+    const data = await res.json();
+    // 응답이 배열이거나 { courses: [...] } 형태일 수 있음
+    return Array.isArray(data) ? data : (data.courses ?? data.items ?? []);
+  }, { apiBase, start, limit });
 }
 
-async function fetchCourseDetail(page: import('playwright').Page, courseId: number): Promise<{ startPoint?: { lat: number; lng: number } }> {
-  return page.evaluate(async (id) => {
-    const res = await fetch(`/course-service/course/${id}`, { credentials: 'include' });
+async function fetchCourseDetail(page: import('playwright').Page, apiBase: string, courseId: number): Promise<{ startPoint?: { lat: number; lng: number } }> {
+  return page.evaluate(async ({ apiBase, courseId }) => {
+    const res = await fetch(`${apiBase}/course/${courseId}`, { credentials: 'include' });
     if (!res.ok) return {};
     return res.json();
-  }, courseId);
+  }, { apiBase, courseId });
 }
 
-async function downloadGpx(page: import('playwright').Page, courseId: number): Promise<string> {
-  return page.evaluate(async (id) => {
-    const res = await fetch(`/course-service/course/${id}/gpx`, { credentials: 'include' });
+async function downloadGpx(page: import('playwright').Page, apiBase: string, courseId: number): Promise<string> {
+  return page.evaluate(async ({ apiBase, courseId }) => {
+    const res = await fetch(`${apiBase}/course/${courseId}/gpx`, { credentials: 'include' });
     if (!res.ok) throw new Error(`GPX 다운로드 실패: HTTP ${res.status}`);
     return res.text();
-  }, courseId);
+  }, { apiBase, courseId });
 }
 
 async function main(): Promise<void> {

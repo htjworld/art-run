@@ -1,6 +1,5 @@
 <div align="center">
-  <img src="./assets/logo.png" width="120" />
-  <h1>ArtRun</h1>
+  <img src="./assets/logo.png" alt="ArtRun"/>
   <a href="https://htjworld.github.io/art-run/">🔗 서비스 바로가기</a>
 </div>
 
