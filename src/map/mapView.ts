@@ -1,6 +1,7 @@
-import maplibregl, { Map, type GeoJSONSource } from 'maplibre-gl';
+import maplibregl, { Map, type GeoJSONSource, type LngLatBoundsLike } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { FeatureCollection, LineString, Point } from 'geojson';
+import type { Course } from '../gallery/courses';
 import {
   ALL_LAYERS,
   SRC_OVERLAY,
@@ -128,4 +129,20 @@ export function updatePointsSource(
 
 export function resizeMap(): void {
   mapInstance?.resize();
+}
+
+export function flyToCourse(course: Course): void {
+  const map = getMap();
+  if (course.route && course.route.coordinates.length >= 2) {
+    const coords = course.route.coordinates as [number, number][];
+    const lngs = coords.map(c => c[0]);
+    const lats = coords.map(c => c[1]);
+    const bounds: LngLatBoundsLike = [
+      [Math.min(...lngs), Math.min(...lats)],
+      [Math.max(...lngs), Math.max(...lats)],
+    ];
+    map.fitBounds(bounds, { padding: 60, duration: 1200, essential: true });
+  } else {
+    map.flyTo({ center: course.center, zoom: course.zoom, duration: 1200, essential: true });
+  }
 }

@@ -3,7 +3,7 @@ import type { Course, CourseType } from './courses';
 import { createTabs } from '../ui/tabs';
 import { triggerGpxDownload } from '../gpx/export';
 import { loadCourse } from './loadCourse';
-import { getMap } from '../map/mapView';
+import { flyToCourse } from '../map/mapView';
 import { showOnlyCourse } from '../map/overlay';
 import { startRouteAnimation } from '../map/routeAnimator';
 
@@ -123,15 +123,8 @@ function createCard(course: Course): HTMLElement {
   body.appendChild(actions);
   li.appendChild(body);
 
-  // 카드 클릭 → flyTo + 강조
   li.addEventListener('click', () => {
-    const map = getMap();
-    map.flyTo({
-      center: course.center,
-      zoom: course.zoom,
-      duration: 1200,
-      essential: true,
-    });
+    flyToCourse(course);
     showOnlyCourse(course.id);
     if (course.route) startRouteAnimation(course.route);
     onCourseSelect?.(course.id);

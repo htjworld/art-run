@@ -1,7 +1,7 @@
 import { el } from '../util/dom';
 import type { Course, CourseType } from '../gallery/courses';
 import { showOnlyCourse } from '../map/overlay';
-import { getMap } from '../map/mapView';
+import { flyToCourse } from '../map/mapView';
 import { triggerGpxDownload } from '../gpx/export';
 import { startRouteAnimation, stopRouteAnimation } from '../map/routeAnimator';
 
@@ -106,8 +106,6 @@ function renderChips(type: CourseType): void {
 }
 
 function toggleCourse(course: Course): void {
-  const map = getMap();
-
   if (selectedId === course.id) {
     selectedId = null;
     showOnlyCourse(null);
@@ -117,7 +115,7 @@ function toggleCourse(course: Course): void {
     selectedId = course.id;
     showOnlyCourse(course.id);
     showInfoPanel(course);
-    map.flyTo({ center: course.center, zoom: course.zoom, duration: 1200, essential: true });
+    flyToCourse(course);
     if (course.route) startRouteAnimation(course.route);
   }
 
