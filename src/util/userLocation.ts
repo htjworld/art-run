@@ -11,8 +11,8 @@ export function startLocationWatch(): void {
       currentPos = [pos.coords.longitude, pos.coords.latitude];
       listeners.forEach(fn => fn(currentPos![0], currentPos![1]));
     },
-    () => {},
-    { enableHighAccuracy: false, maximumAge: 30000 },
+    () => { watchId = null; },
+    { enableHighAccuracy: false, maximumAge: 0 },
   );
 }
 

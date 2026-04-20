@@ -67,6 +67,15 @@ export async function initMap(container: HTMLElement): Promise<Map> {
     map.once('error', reject);
   });
 
+  // 베이스 맵 스타일의 누락 스프라이트 이미지 → 투명 1×1 placeholder로 대체
+  map.on('styleimagemissing', (e: { id: string }) => {
+    if (!e.id) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    map.addImage(e.id, canvas);
+  });
+
   // 소스 등록
   map.addSource(SRC_OVERLAY, { type: 'geojson', data: emptyFC(), promoteId: 'id' });
   map.addSource(SRC_ROUTE, { type: 'geojson', data: emptyFC() });
