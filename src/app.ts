@@ -45,8 +45,23 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
     flyToPoint(lng, lat, 13);
   }
 
-  startLocationWatch();
   onLocationUpdate((lng, lat) => setUserLocation(lng, lat));
+
+  // Safari: permissions API가 있으면 상태 확인 후 시작 (자동 팝업 방지)
+  // 이미 허용된 경우 즉시 시작, 사용자가 GeolocateControl 클릭 후 허용하면 change 이벤트로 시작
+  // permissions API 없으면 무조건 시작 (Chrome 구형 등 fallback)
+  if (navigator.permissions) {
+    navigator.permissions.query({ name: 'geolocation' as PermissionName })
+      .then(result => {
+        if (result.state === 'granted') startLocationWatch();
+        result.addEventListener('change', () => {
+          if (result.state === 'granted') startLocationWatch();
+        });
+      })
+      .catch(() => startLocationWatch());
+  } else {
+    startLocationWatch();
+  }
 
   // 타이틀바 (모바일)
   const titlebar = document.createElement('div');
