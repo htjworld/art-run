@@ -56,11 +56,53 @@ function renderList(container: HTMLElement, type: CourseType): void {
   }
 }
 
+function createRouteSvg(coords: [number, number][]): SVGSVGElement {
+  const W = 300, H = 96, PAD = 10;
+
+  const lngs = coords.map(c => c[0]);
+  const lats = coords.map(c => c[1]);
+  const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const spanLng = maxLng - minLng || 1;
+  const spanLat = maxLat - minLat || 1;
+
+  // 비율 유지하며 맞춤
+  const scaleX = (W - PAD * 2) / spanLng;
+  const scaleY = (H - PAD * 2) / spanLat;
+  const scale = Math.min(scaleX, scaleY);
+  const offX = (W - spanLng * scale) / 2;
+  const offY = (H - spanLat * scale) / 2;
+
+  const pts = coords
+    .map(([lng, lat]) => [
+      offX + (lng - minLng) * scale,
+      H - (offY + (lat - minLat) * scale), // lat 반전
+    ])
+    .map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`)
+    .join(' ');
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'course-card__route-svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('aria-hidden', 'true');
+
+  const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  polyline.setAttribute('points', pts);
+  polyline.setAttribute('fill', 'none');
+  polyline.setAttribute('stroke', '#242424');
+  polyline.setAttribute('stroke-width', '2.5');
+  polyline.setAttribute('stroke-linecap', 'round');
+  polyline.setAttribute('stroke-linejoin', 'round');
+
+  svg.appendChild(polyline);
+  return svg as unknown as SVGSVGElement;
+}
+
 function createCard(course: Course): HTMLElement {
   const li = el('li', { class: 'course-card' });
   li.setAttribute('aria-label', course.name);
 
-  // 썸네일
+  // 썸네일 or 경로 SVG 미리보기
   if (course.thumbnail) {
     const img = el('img', {
       class: 'course-card__thumb',
@@ -73,9 +115,10 @@ function createCard(course: Course): HTMLElement {
     });
     li.appendChild(img);
   } else {
-    const placeholder = el('div', { class: 'course-card__thumb-placeholder' });
-    placeholder.textContent = course.type === 'artrun' ? '🎨' : '🏃';
-    li.appendChild(placeholder);
+    const route = course.routeSimplified ?? course.route;
+    if (route && route.coordinates.length >= 2) {
+      li.appendChild(createRouteSvg(route.coordinates as [number, number][]));
+    }
   }
 
   const body = el('div', { class: 'course-card__body' });
