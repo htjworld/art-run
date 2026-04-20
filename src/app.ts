@@ -71,8 +71,16 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
   const hint = document.createElement('div');
   hint.className = 'map-hint';
   hint.textContent = '지도를 탭해서 그림 그리기를 시작해요';
+  const hintSeen = localStorage.getItem('artrun:hint-seen');
+  if (hintSeen) {
+    hint.classList.add('hidden');
+  } else {
+    setTimeout(() => {
+      hint.classList.add('hidden');
+      localStorage.setItem('artrun:hint-seen', '1');
+    }, 3000);
+  }
   mapWrap.appendChild(hint);
-  setTimeout(() => hint.classList.add('hidden'), 3000);
 
   // 지도 초기화
   const map = await initMap(mapEl);
@@ -132,8 +140,6 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
     const errorLines = getErrorLines(points);
     updateErrorSource(errorLines);
 
-    // 힌트 표시/숨김
-    hint.classList.toggle('hidden', points.length > 0);
   }
 
   drawStore.subscribe(syncMapLayers);
