@@ -11,12 +11,16 @@ import { setRoutingProvider } from './draw/routeComposer';
 import { OrsClient } from './routing/orsClient';
 import { createToolbar } from './ui/toolbar';
 import { createModeToggle } from './ui/modeToggle';
-import { initGallery } from './gallery/galleryView';
+import { initGallery, clearGallerySelection } from './gallery/galleryView';
 import { createLocationSearch } from './ui/locationSearch';
 import { createCourseChips } from './ui/courseChips';
 import { showToast } from './ui/toast';
+import { showOnlyCourse } from './map/overlay';
+import { stopRouteAnimation } from './map/routeAnimator';
+import { flyToPoint } from './map/mapView';
 import coursesData from './gallery/courses.json';
 import type { Course } from './gallery/courses';
+import logoUrl from '../assets/logo.png';
 
 export async function initApp(rootEl: HTMLElement): Promise<void> {
   // ORS 프로바이더 등록
@@ -30,10 +34,40 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
   // 앱 구조 빌드
   rootEl.innerHTML = '';
 
+  // 초기화 함수 — 로고 클릭 시 호출
+  let lastKnownPos: [number, number] | null = null;
+  const DEFAULT_CENTER: [number, number] = [126.9784, 37.5665];
+
+  function resetAll(): void {
+    drawStore.clear();
+    routeStore.clear();
+    clearGallerySelection();
+    showOnlyCourse(null);
+    stopRouteAnimation();
+    const [lng, lat] = lastKnownPos ?? DEFAULT_CENTER;
+    flyToPoint(lng, lat, 13);
+  }
+
+  // 위치 추적 (초기화 시 fly 대상으로 사용)
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      lastKnownPos = [pos.coords.longitude, pos.coords.latitude];
+    }, () => {}, { timeout: 10000 });
+  }
+
   // 타이틀바 (모바일)
   const titlebar = document.createElement('div');
   titlebar.className = 'titlebar';
-  titlebar.innerHTML = `<span class="titlebar__wordmark">ArtRun</span>`;
+  const titlebarLogo = document.createElement('img');
+  titlebarLogo.src = logoUrl;
+  titlebarLogo.alt = 'ArtRun 홈으로';
+  titlebarLogo.className = 'logo-btn';
+  titlebarLogo.setAttribute('role', 'button');
+  titlebarLogo.setAttribute('tabindex', '0');
+  titlebarLogo.setAttribute('aria-label', '홈으로 — 모든 그리기 초기화');
+  titlebarLogo.addEventListener('click', resetAll);
+  titlebarLogo.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') resetAll(); });
+  titlebar.appendChild(titlebarLogo);
   rootEl.appendChild(titlebar);
 
   // 레이아웃
@@ -46,7 +80,16 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
   sidebar.className = 'sidebar';
   const sidebarHeader = document.createElement('div');
   sidebarHeader.className = 'sidebar__header';
-  sidebarHeader.innerHTML = `<span class="sidebar__wordmark">ArtRun</span>`;
+  const sidebarLogo = document.createElement('img');
+  sidebarLogo.src = logoUrl;
+  sidebarLogo.alt = 'ArtRun 홈으로';
+  sidebarLogo.className = 'logo-btn';
+  sidebarLogo.setAttribute('role', 'button');
+  sidebarLogo.setAttribute('tabindex', '0');
+  sidebarLogo.setAttribute('aria-label', '홈으로 — 모든 그리기 초기화');
+  sidebarLogo.addEventListener('click', resetAll);
+  sidebarLogo.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') resetAll(); });
+  sidebarHeader.appendChild(sidebarLogo);
   const sidebarTop = document.createElement('div');
   sidebarTop.className = 'sidebar__top';
   const sidebarContent = document.createElement('div');

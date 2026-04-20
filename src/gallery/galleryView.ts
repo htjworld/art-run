@@ -29,6 +29,11 @@ function sortedByDistance(courses: Course[]): Course[] {
   return [...courses].sort((a, b) => distKmTo(a) - distKmTo(b));
 }
 
+export function clearGallerySelection(): void {
+  selectedId = null;
+  document.querySelectorAll('.course-card.active').forEach(el => el.classList.remove('active'));
+}
+
 export function setUserLocation(lng: number, lat: number): void {
   userPos = [lng, lat];
   for (const { container: c, listContainer: lc } of galleries) {
