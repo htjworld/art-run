@@ -77,12 +77,12 @@ html, body {
 .titlebar__wordmark {
   font-size: 18px;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--accent);
   letter-spacing: -0.3px;
   text-shadow:
-    0 0 6px rgba(189, 239, 252, 0.95),
-    0 0 14px rgba(189, 239, 252, 0.75),
-    0 0 28px rgba(189, 239, 252, 0.45);
+    0 0 6px rgba(36, 36, 36, 0.9),
+    0 0 14px rgba(36, 36, 36, 0.6),
+    0 0 28px rgba(36, 36, 36, 0.3);
 }
 
 /* ─── Sidebar (desktop) ──────────────────────────────────── */
@@ -105,14 +105,14 @@ html, body {
 .sidebar__wordmark {
   font-size: 20px;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--accent);
   letter-spacing: -0.5px;
   margin-bottom: 16px;
   display: block;
   text-shadow:
-    0 0 6px rgba(189, 239, 252, 0.95),
-    0 0 14px rgba(189, 239, 252, 0.75),
-    0 0 28px rgba(189, 239, 252, 0.45);
+    0 0 6px rgba(36, 36, 36, 0.9),
+    0 0 14px rgba(36, 36, 36, 0.6),
+    0 0 28px rgba(36, 36, 36, 0.3);
 }
 
 .sidebar__top {
@@ -419,7 +419,7 @@ html, body {
 
 .course-card {
   background: var(--bg);
-  border: 1px solid var(--line);
+  border: 1px solid rgba(36, 36, 36, 0.18);
   border-radius: var(--r-md);
   margin-bottom: 10px;
   overflow: hidden;
