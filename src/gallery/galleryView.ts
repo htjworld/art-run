@@ -29,6 +29,15 @@ function sortedByDistance(courses: Course[]): Course[] {
   return [...courses].sort((a, b) => distKmTo(a) - distKmTo(b));
 }
 
+export function setUserLocation(lng: number, lat: number): void {
+  userPos = [lng, lat];
+  for (const { container: c, listContainer: lc } of galleries) {
+    const activeTab = (c.querySelector('.tabs__btn.active') as HTMLElement | null)
+      ?.dataset.tab as CourseType | undefined;
+    renderList(lc, activeTab ?? 'artrun');
+  }
+}
+
 export function initGallery(
   container: HTMLElement,
   courses: Course[],

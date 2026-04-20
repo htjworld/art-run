@@ -12,6 +12,7 @@ import { OrsClient } from './routing/orsClient';
 import { createToolbar } from './ui/toolbar';
 import { createModeToggle } from './ui/modeToggle';
 import { initGallery } from './gallery/galleryView';
+import { createLocationSearch } from './ui/locationSearch';
 import { createCourseChips } from './ui/courseChips';
 import { showToast } from './ui/toast';
 import coursesData from './gallery/courses.json';
@@ -97,6 +98,12 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
 
   // 모드 토글
   createModeToggle(mapWrap);
+
+  // 위치 검색 (데스크톱 사이드바 상단)
+  const kakaoKey = import.meta.env.VITE_KAKAO_KEY as string | undefined;
+  if (kakaoKey) {
+    createLocationSearch(sidebarTop, kakaoKey);
+  }
 
   // 갤러리 (데스크톱 사이드바)
   const courses = coursesData as unknown as Course[];

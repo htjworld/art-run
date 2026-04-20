@@ -131,6 +131,10 @@ export function resizeMap(): void {
   mapInstance?.resize();
 }
 
+export function flyToPoint(lng: number, lat: number, zoom = 15): void {
+  getMap().flyTo({ center: [lng, lat], zoom, duration: 1000, essential: true });
+}
+
 export function flyToCourse(course: Course): void {
   const map = getMap();
   if (course.route && course.route.coordinates.length >= 2) {
