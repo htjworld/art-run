@@ -52,6 +52,15 @@ export async function initMap(container: HTMLElement): Promise<Map> {
     'bottom-right'
   );
 
+  map.addControl(
+    new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: false,
+      showAccuracyCircle: true,
+    }),
+    'bottom-right'
+  );
+
   await new Promise<void>((resolve, reject) => {
     map.once('load', () => resolve());
     map.once('error', reject);

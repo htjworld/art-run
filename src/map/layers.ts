@@ -13,7 +13,9 @@ export const SRC_ERROR = 'draw-error';
 export const SRC_POINTS = 'draw-points';
 
 // ─── Layer IDs ───────────────────────────────────────────────
-export const LYR_OVERLAY_LINES = 'overlay-lines';
+export const LYR_OVERLAY_HALO = 'overlay-halo';
+export const LYR_OVERLAY_ARTRUN = 'overlay-artrun';
+export const LYR_OVERLAY_SCENIC = 'overlay-scenic';
 export const LYR_OVERLAY_SYMBOLS = 'overlay-symbols';
 export const LYR_ROUTE_PENDING = 'route-pending';
 export const LYR_ROUTE_ERROR = 'route-error';
@@ -25,8 +27,21 @@ export const LYR_POINTS_LABEL = 'points-label';
 
 // ─── Layer 정의 ───────────────────────────────────────────────
 
-export const overlayLinesLayer: LineLayerSpecification = {
-  id: LYR_OVERLAY_LINES,
+export const overlayHaloLayer: LineLayerSpecification = {
+  id: LYR_OVERLAY_HALO,
+  type: 'line',
+  source: SRC_OVERLAY,
+  minzoom: 10,
+  layout: { 'line-cap': 'round', 'line-join': 'round' },
+  paint: {
+    'line-color': '#FFFFFF',
+    'line-width': 9,
+    'line-opacity': 0,
+  },
+};
+
+export const overlayArtrunLayer: LineLayerSpecification = {
+  id: LYR_OVERLAY_ARTRUN,
   type: 'line',
   source: SRC_OVERLAY,
   minzoom: 10,
@@ -35,12 +50,20 @@ export const overlayLinesLayer: LineLayerSpecification = {
     'line-color': '#BDEFFC',
     'line-width': 5,
     'line-opacity': 0,
-    'line-dasharray': [
-      'case',
-      ['==', ['get', 'type'], 'artrun'],
-      ['literal', [2, 2]],
-      ['literal', [1, 0]],
-    ],
+    'line-dasharray': [4, 3],
+  },
+};
+
+export const overlayScenicLayer: LineLayerSpecification = {
+  id: LYR_OVERLAY_SCENIC,
+  type: 'line',
+  source: SRC_OVERLAY,
+  minzoom: 10,
+  layout: { 'line-cap': 'round', 'line-join': 'round' },
+  paint: {
+    'line-color': '#BDEFFC',
+    'line-width': 5,
+    'line-opacity': 0,
   },
 };
 
@@ -151,7 +174,9 @@ export const pointsLabelLayer: SymbolLayerSpecification = {
 };
 
 export const ALL_LAYERS: LayerSpecification[] = [
-  overlayLinesLayer,
+  overlayHaloLayer,
+  overlayArtrunLayer,
+  overlayScenicLayer,
   overlaySymbolsLayer,
   routePendingLayer,
   routeErrorLayer,

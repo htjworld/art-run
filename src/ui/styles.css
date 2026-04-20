@@ -766,6 +766,58 @@ html, body {
   font-weight: 600;
 }
 
+/* ─── Course Info Panel (map floating) ──────────────────── */
+.course-info-panel {
+  position: absolute;
+  bottom: calc(var(--peek-h) + 16px);
+  left: 16px;
+  z-index: 20;
+  background: var(--bg);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-toolbar);
+  padding: 12px 14px;
+  min-width: 200px;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transform: translateY(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
+}
+
+.course-info-panel.visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.course-info__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.course-info__meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.course-info__gpx {
+  margin-top: 2px;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .course-info-panel {
+    bottom: 24px;
+  }
+}
+
 /* ─── Reduced motion ─────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

@@ -20,6 +20,9 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Claude Code 로컬 설정 (머신별 권한 — 커밋 금지)
+.claude/
+
 # 에디터
 .vscode/settings.json
 .vscode/extensions.json

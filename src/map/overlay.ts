@@ -1,7 +1,7 @@
 import type { FeatureCollection, Feature, LineString } from 'geojson';
 import { getMap } from './mapView';
-import { SRC_OVERLAY, LYR_OVERLAY_LINES } from './layers';
-import type { GeoJSONSource } from 'maplibre-gl';
+import { SRC_OVERLAY, LYR_OVERLAY_HALO, LYR_OVERLAY_ARTRUN, LYR_OVERLAY_SCENIC } from './layers';
+import type { GeoJSONSource, FilterSpecification } from 'maplibre-gl';
 import type { Course } from '../gallery/courses';
 
 let selectedId: string | null = null;
@@ -35,16 +35,31 @@ export function setEditingCourse(id: string | null): void {
   applyFilter();
 }
 
+const OVERLAY_LAYERS = [LYR_OVERLAY_HALO, LYR_OVERLAY_ARTRUN, LYR_OVERLAY_SCENIC] as const;
+
 function applyFilter(): void {
   const map = getMap();
-  if (!map.getLayer(LYR_OVERLAY_LINES)) return;
+
+  if (!OVERLAY_LAYERS.every(id => map.getLayer(id))) return;
 
   if (!selectedId || selectedId === editingId) {
-    map.setPaintProperty(LYR_OVERLAY_LINES, 'line-opacity', 0);
-    map.setFilter(LYR_OVERLAY_LINES, null);
+    for (const lyr of OVERLAY_LAYERS) {
+      map.setPaintProperty(lyr, 'line-opacity', 0);
+      map.setFilter(lyr, null);
+    }
     return;
   }
 
-  map.setFilter(LYR_OVERLAY_LINES, ['==', ['get', 'id'], selectedId]);
-  map.setPaintProperty(LYR_OVERLAY_LINES, 'line-opacity', 0.9);
+  const idEq = ['==', ['get', 'id'], selectedId] as FilterSpecification;
+  const artrunFilter = ['all', idEq, ['==', ['get', 'type'], 'artrun']] as FilterSpecification;
+  const scenicFilter = ['all', idEq, ['==', ['get', 'type'], 'scenic']] as FilterSpecification;
+
+  map.setFilter(LYR_OVERLAY_HALO, idEq);
+  map.setPaintProperty(LYR_OVERLAY_HALO, 'line-opacity', 0.8);
+
+  map.setFilter(LYR_OVERLAY_ARTRUN, artrunFilter);
+  map.setPaintProperty(LYR_OVERLAY_ARTRUN, 'line-opacity', 0.95);
+
+  map.setFilter(LYR_OVERLAY_SCENIC, scenicFilter);
+  map.setPaintProperty(LYR_OVERLAY_SCENIC, 'line-opacity', 0.95);
 }
