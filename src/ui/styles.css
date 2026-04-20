@@ -115,6 +115,13 @@ html, body {
     0 0 28px rgba(189, 239, 252, 0.45);
 }
 
+.sidebar__top {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  min-height: 52px;
+}
+
 .sidebar__content {
   flex: 1;
   overflow-y: auto;
@@ -683,13 +690,12 @@ html, body {
 @media (max-width: 1023px) {
   .titlebar { display: flex; }
   .sidebar { display: none; }
-  .sheet { display: flex; flex-direction: column; }
   .toolbar { top: auto; bottom: 100px; right: 12px; }
-  .mode-toggle { bottom: calc(var(--peek-h) + 16px); }
+  .mode-toggle { bottom: 16px; }
 }
 
 @media (min-width: 1024px) {
-  .sheet { display: none !important; }
+  .chips-panel { display: none; }
 }
 
 /* ─── Course Chips (map floating) ───────────────────────── */

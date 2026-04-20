@@ -11,7 +11,6 @@ import { setRoutingProvider } from './draw/routeComposer';
 import { OrsClient } from './routing/orsClient';
 import { createToolbar } from './ui/toolbar';
 import { createModeToggle } from './ui/modeToggle';
-import { createBottomSheet } from './ui/sheet';
 import { initGallery } from './gallery/galleryView';
 import { createCourseChips } from './ui/courseChips';
 import { showToast } from './ui/toast';
@@ -47,9 +46,12 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
   const sidebarHeader = document.createElement('div');
   sidebarHeader.className = 'sidebar__header';
   sidebarHeader.innerHTML = `<span class="sidebar__wordmark">ArtRun</span>`;
+  const sidebarTop = document.createElement('div');
+  sidebarTop.className = 'sidebar__top';
   const sidebarContent = document.createElement('div');
   sidebarContent.className = 'sidebar__content';
   sidebar.appendChild(sidebarHeader);
+  sidebar.appendChild(sidebarTop);
   sidebar.appendChild(sidebarContent);
   layout.appendChild(sidebar);
 
@@ -96,11 +98,11 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
   // 모드 토글
   createModeToggle(mapWrap);
 
-  // 갤러리 (사이드바 + 바텀시트 공유)
+  // 갤러리 (데스크톱 사이드바)
   const courses = coursesData as unknown as Course[];
   initGallery(sidebarContent, courses);
 
-  // 코스 칩 버튼 (지도 위 플로팅)
+  // 코스 칩 버튼 (모바일 지도 위 플로팅, 데스크톱에서는 CSS로 숨김)
   createCourseChips(mapWrap, courses);
 
   // 오버레이 로드
@@ -108,18 +110,6 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
 
   // 경로 애니메이션 초기화
   initRouteAnimator();
-
-  // 바텀시트 (모바일)
-  const { el: sheetEl } = createBottomSheet(mapWrap);
-  const sheetHeader = sheetEl.querySelector('.sheet__header') as HTMLElement;
-  const sheetContent = sheetEl.querySelector('.sheet__content') as HTMLElement;
-  initGallery(sheetHeader, courses);
-  // sheetContent에 추가 목록 (실제로는 sheetHeader가 탭+콘텐츠를 가짐)
-  // sheet 내부 구조 재정렬
-  const sheetInner = document.createElement('div');
-  sheetInner.style.padding = '0 4px';
-  sheetContent.appendChild(sheetInner);
-  initGallery(sheetInner, courses);
 
   // 상태 구독 → 지도 레이어 업데이트
   function syncMapLayers(): void {
