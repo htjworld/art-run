@@ -80,7 +80,7 @@ async function main(): Promise<void> {
   console.log('준비 방법:');
   console.log('  1. 터미널을 새로 열어 아래 명령어로 Chrome을 실행하세요:');
   console.log('');
-  console.log('     "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9222');
+  console.log('     "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9222 --user-data-dir=C:\\Temp\\chrome-debug');
   console.log('');
   console.log('  2. 열린 Chrome에서 https://connect.garmin.com 로그인');
   console.log('  3. 로그인 완료 후 아래에서 Enter');
