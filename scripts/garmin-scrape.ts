@@ -72,8 +72,20 @@ async function downloadGpx(page: import('playwright').Page, courseId: number): P
 }
 
 async function main(): Promise<void> {
-  const browser = await chromium.launch({ headless: false, slowMo: 50 });
-  const context = await browser.newContext();
+  // 설치된 Chrome 사용 (봇 감지 우회) — 없으면 Chromium 폴백
+  let browser: import('playwright').Browser;
+  try {
+    browser = await chromium.launch({ channel: 'chrome', headless: false, slowMo: 50 });
+  } catch {
+    console.log('Chrome을 찾지 못해 Chromium으로 시도합니다...');
+    browser = await chromium.launch({ headless: false, slowMo: 50 });
+  }
+
+  const context = await browser.newContext({
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    locale: 'ko-KR',
+    timezoneId: 'Asia/Seoul',
+  });
   const page = await context.newPage();
 
   console.log('\n🌐 Garmin Connect 로그인 페이지를 엽니다...');
