@@ -2,38 +2,43 @@
  * 갤러리 코스 프리컴퓨트 스크립트
  * 실행: pnpm precompute
  *
- * 우선순위:
- *   1. scripts/gpx/{id}.gpx 파일이 있으면 → GPX에서 직접 로드 (ORS 호출 없음)
- *   2. GPX 없으면 → waypoints → ORS 보행 경로 계산
+ * 구조:
+ *   scripts/gpx/artrun/{id}.gpx + {id}.json  → 인기 아트런
+ *   scripts/gpx/scenic/{id}.gpx  + {id}.json → 인기 코스
  *
- * GPX 추가/교체 방법:
- *   scripts/gpx/{course-id}.gpx 파일을 넣고 pnpm precompute 실행
+ * 코스 추가 방법:
+ *   1. scripts/gpx/artrun/ 또는 scenic/ 에 {id}.gpx 추가
+ *   2. 같은 폴더에 {id}.json (메타 정보) 추가
+ *   3. pnpm precompute 실행 → courses.json 자동 갱신
  */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { LineString } from 'geojson';
 
-// .env.local 자동 로드
-const envPath = join(process.cwd(), '.env.local');
-if (existsSync(envPath)) {
-  for (const line of readFileSync(envPath, 'utf-8').split('\n')) {
-    const m = line.match(/^([^#][^=]*)=(.*)$/);
-    if (m) process.env[m[1].trim()] = m[2].trim();
-  }
-}
-
-const ORS_KEY = process.env.VITE_ORS_KEY;
-const ORS_URL = 'https://api.openrouteservice.org/v2/directions/foot-walking/geojson';
 const SIMPLIFY_TOLERANCE = 0.00005; // ~5m
 const GPX_DIR = join(process.cwd(), 'scripts', 'gpx');
 
-interface RawCourse {
+interface CourseMeta {
+  name: string;
+  region: string;
+  description: string;
+  thumbnail?: string;
+  center?: [number, number];
+  zoom?: number;
+}
+
+interface Course {
   id: string;
+  type: 'artrun' | 'scenic';
   name: string;
   distanceKm: number;
-  waypoints: [number, number][];
-  route: LineString | null;
-  routeSimplified: LineString | null;
+  region: string;
+  description: string;
+  thumbnail: string;
+  center: [number, number];
+  zoom: number;
+  route: LineString;
+  routeSimplified: LineString;
 }
 
 // ─── GPX 파싱 ────────────────────────────────────────────────────────────────
@@ -45,38 +50,6 @@ function parseGpx(content: string): LineString {
     coords.push([parseFloat(m[2]), parseFloat(m[1])]); // GeoJSON: [lng, lat]
   }
   if (coords.length < 2) throw new Error('trkpt 좌표가 2개 미만입니다');
-  return { type: 'LineString', coordinates: coords };
-}
-
-// ─── ORS 라우팅 ──────────────────────────────────────────────────────────────
-async function routeSegment(
-  from: [number, number],
-  to: [number, number],
-): Promise<LineString> {
-  if (!ORS_KEY) throw new Error('VITE_ORS_KEY 환경변수가 없습니다.');
-
-  const res = await fetch(ORS_URL, {
-    method: 'POST',
-    headers: { Authorization: ORS_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ coordinates: [from, to] }),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`ORS 오류 ${res.status}: ${text}`);
-  }
-
-  const json = (await res.json()) as { features: Array<{ geometry: LineString }> };
-  return json.features[0].geometry;
-}
-
-function mergeLines(lines: LineString[]): LineString {
-  const coords: [number, number][] = [];
-  for (let i = 0; i < lines.length; i++) {
-    const lc = lines[i].coordinates as [number, number][];
-    if (i === 0) coords.push(...lc);
-    else coords.push(...lc.slice(1));
-  }
   return { type: 'LineString', coordinates: coords };
 }
 
@@ -128,70 +101,93 @@ function calcDistanceKm(line: LineString): number {
   return Math.round(totalM / 100) / 10;
 }
 
-async function sleep(ms: number): Promise<void> {
-  return new Promise(r => setTimeout(r, ms));
+function calcCenter(line: LineString): [number, number] {
+  const coords = line.coordinates as [number, number][];
+  const lngs = coords.map(c => c[0]);
+  const lats = coords.map(c => c[1]);
+  return [
+    Math.round(((Math.min(...lngs) + Math.max(...lngs)) / 2) * 10000) / 10000,
+    Math.round(((Math.min(...lats) + Math.max(...lats)) / 2) * 10000) / 10000,
+  ];
+}
+
+function calcZoom(line: LineString): number {
+  const coords = line.coordinates as [number, number][];
+  const lngs = coords.map(c => c[0]);
+  const lats = coords.map(c => c[1]);
+  const span = Math.max(
+    Math.max(...lngs) - Math.min(...lngs),
+    Math.max(...lats) - Math.min(...lats),
+  );
+  if (span < 0.01) return 15;
+  if (span < 0.03) return 14;
+  if (span < 0.06) return 13;
+  if (span < 0.1) return 12;
+  return 11;
 }
 
 // ─── 메인 ────────────────────────────────────────────────────────────────────
 async function main(): Promise<void> {
-  const coursesPath = join(process.cwd(), 'src', 'gallery', 'courses.json');
-  const courses = JSON.parse(readFileSync(coursesPath, 'utf-8')) as RawCourse[];
+  const courses: Course[] = [];
 
-  console.log(`📍 코스 ${courses.length}개 프리컴퓨트 시작\n`);
+  for (const type of ['artrun', 'scenic'] as const) {
+    const dir = join(GPX_DIR, type);
+    const gpxFiles = readdirSync(dir)
+      .filter(f => f.endsWith('.gpx'))
+      .sort();
 
-  for (const course of courses) {
-    const gpxPath = join(GPX_DIR, `${course.id}.gpx`);
+    for (const gpxFile of gpxFiles) {
+      const id = gpxFile.replace('.gpx', '');
+      const gpxPath = join(dir, gpxFile);
+      const metaPath = join(dir, `${id}.json`);
 
-    if (existsSync(gpxPath)) {
-      // ── 1순위: GPX 파일 직접 로드 ──
-      console.log(`📂 ${course.name} — GPX 로드 (${course.id}.gpx)`);
+      if (!existsSync(metaPath)) {
+        console.warn(`⚠️  [${type}] ${id}: ${id}.json 없음 — 건너뜀`);
+        continue;
+      }
+
+      let meta: CourseMeta;
+      try {
+        meta = JSON.parse(readFileSync(metaPath, 'utf-8')) as CourseMeta;
+      } catch (err) {
+        console.error(`❌ [${type}] ${id}: JSON 파싱 실패 —`, (err as Error).message);
+        continue;
+      }
+
       try {
         const content = readFileSync(gpxPath, 'utf-8');
         const route = parseGpx(content);
-        course.route = route;
-        course.routeSimplified = simplifyLine(route, SIMPLIFY_TOLERANCE);
-        course.distanceKm = calcDistanceKm(route);
+        const routeSimplified = simplifyLine(route, SIMPLIFY_TOLERANCE);
+        const distanceKm = calcDistanceKm(route);
+        const center = meta.center ?? calcCenter(route);
+        const zoom = meta.zoom ?? calcZoom(route);
+
+        courses.push({
+          id,
+          type,
+          name: meta.name,
+          distanceKm,
+          region: meta.region,
+          description: meta.description,
+          thumbnail: meta.thumbnail ?? '',
+          center,
+          zoom,
+          route,
+          routeSimplified,
+        });
+
         console.log(
-          `   ✅ ${course.distanceKm}km · ${route.coordinates.length}pts → ${course.routeSimplified.coordinates.length}pts`,
+          `✅ [${type}] ${meta.name} — ${distanceKm}km · ${route.coordinates.length}pts → ${routeSimplified.coordinates.length}pts`,
         );
       } catch (err) {
-        console.error(`   ❌ GPX 파싱 실패:`, (err as Error).message);
+        console.error(`❌ [${type}] ${id} GPX 파싱 실패:`, (err as Error).message);
       }
-      continue;
-    }
-
-    // ── 2순위: waypoints → ORS 라우팅 ──
-    if (course.waypoints.length < 2) {
-      console.log(`⏭  ${course.name}: waypoints 부족 — 건너뜀`);
-      continue;
-    }
-    if (!ORS_KEY) {
-      console.warn(`⚠️  ${course.name}: GPX 없고 ORS 키도 없음 — 건너뜀`);
-      continue;
-    }
-
-    console.log(`🔄 ${course.name} — ORS 라우팅 (waypoints ${course.waypoints.length}개)`);
-    try {
-      const segments: LineString[] = [];
-      for (let i = 0; i < course.waypoints.length - 1; i++) {
-        const seg = await routeSegment(course.waypoints[i], course.waypoints[i + 1]);
-        segments.push(seg);
-        await sleep(1500); // 40 req/min 제한
-      }
-      const merged = mergeLines(segments);
-      course.route = merged;
-      course.routeSimplified = simplifyLine(merged, SIMPLIFY_TOLERANCE);
-      course.distanceKm = calcDistanceKm(merged);
-      console.log(
-        `   ✅ ${course.distanceKm}km · ${merged.coordinates.length}pts → ${course.routeSimplified.coordinates.length}pts`,
-      );
-    } catch (err) {
-      console.error(`   ❌ ${course.name} 실패:`, (err as Error).message);
     }
   }
 
+  const coursesPath = join(process.cwd(), 'src', 'gallery', 'courses.json');
   writeFileSync(coursesPath, JSON.stringify(courses, null, 2), 'utf-8');
-  console.log(`\n✅ courses.json 업데이트 완료`);
+  console.log(`\n✅ courses.json ${courses.length}개 코스 생성 완료`);
 }
 
 main().catch(err => {
