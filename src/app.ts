@@ -45,23 +45,30 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
     flyToPoint(lng, lat, 13);
   }
 
-  // 위치 권한 상태를 확인해 자동 시작 결정
-  // - 이미 허용(granted): 즉시 watchPosition 시작 → Chrome 재방문 등 정상 동작
-  // - 허용 전(prompt): 자동 요청하지 않음 → 사용자가 locate 버튼 클릭 후 허용 시 change 이벤트로 시작
-  // - Safari 등 permissions API 미지원: 조용히 skip
+  // 위치 리스너는 한 번만 등록
+  onLocationUpdate((lng, lat) => setUserLocation(lng, lat));
+
+  // 권한 상태에 따라 watchPosition 시작
+  // - granted: 즉시 시작 (Chrome 재방문, 이전 허용)
+  // - prompt: change 이벤트로 대기 (Safari 자동 팝업 방지)
+  // - permissions API 없음 / 실패: 바로 시작 (구형 브라우저 fallback)
+  function tryStartWatch(): void {
+    startLocationWatch();
+  }
+
   if (navigator.permissions) {
     navigator.permissions.query({ name: 'geolocation' as PermissionName })
       .then(result => {
-        function tryStart(): void {
-          if (result.state === 'granted') {
-            startLocationWatch();
-            onLocationUpdate((lng, lat) => setUserLocation(lng, lat));
-          }
+        if (result.state === 'granted') {
+          tryStartWatch();
         }
-        tryStart();
-        result.addEventListener('change', tryStart);
+        result.addEventListener('change', () => {
+          if (result.state === 'granted') tryStartWatch();
+        });
       })
-      .catch(() => {});
+      .catch(() => tryStartWatch());
+  } else {
+    tryStartWatch();
   }
 
   // 타이틀바 (모바일)
