@@ -88,17 +88,25 @@ async function main(): Promise<void> {
 
   await ask('Chrome 로그인 완료 후 Enter를 누르세요...');
 
-  console.log('\n🔌 Chrome에 연결 중...');
+  console.log('\n🔌 Chrome에 연결 중... (최대 30초 대기)');
 
-  let context: import('playwright').BrowserContext;
-  try {
-    const browser = await chromium.connectOverCDP('http://localhost:9222');
-    context = browser.contexts()[0] ?? await browser.newContext();
-  } catch {
-    console.error('❌ Chrome 원격 디버깅 연결 실패.');
-    console.error('   위의 chrome.exe 명령어로 Chrome을 먼저 실행했는지 확인하세요.');
+  let context: import('playwright').BrowserContext | null = null;
+  for (let i = 0; i < 15; i++) {
+    try {
+      const browser = await chromium.connectOverCDP('http://localhost:9222');
+      context = browser.contexts()[0] ?? await browser.newContext();
+      break;
+    } catch {
+      process.stdout.write('.');
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+  if (!context) {
+    console.error('\n❌ Chrome 원격 디버깅 연결 실패.');
+    console.error('   포트 확인: curl http://localhost:9222/json');
     process.exit(1);
   }
+  console.log(' 연결됨!');
 
   const page = context.pages()[0] ?? await context.newPage();
 
