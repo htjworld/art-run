@@ -50,7 +50,6 @@ export const overlayArtrunLayer: LineLayerSpecification = {
     'line-color': '#242424',
     'line-width': 5,
     'line-opacity': 0,
-    'line-dasharray': [4, 3],
   },
 };
 
