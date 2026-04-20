@@ -35,7 +35,7 @@ export class OrsClient implements RoutingProvider {
     }
 
     if (res.status === 429) {
-      throw new RoutingError('quota', '오늘의 경로 요청 한도에 도달했어요. 내일 다시 시도해 주세요.');
+      throw new RoutingError('rate-limit', '요청이 잠시 많아요. 재시도 중...');
     }
     if (!res.ok) {
       const text = await res.text().catch(() => '');
@@ -59,20 +59,29 @@ export class OrsClient implements RoutingProvider {
   }
 }
 
-/** 지수 백오프 1회 재시도 (500ms) */
+/** 지수 백오프 재시도 — network/rate-limit 에러는 최대 3회 */
 export async function routeWithRetry(
   provider: RoutingProvider,
   from: LngLat,
   to: LngLat,
   signal?: AbortSignal
 ): Promise<RouteResult> {
-  try {
-    return await provider.route(from, to, signal);
-  } catch (err) {
-    if (err instanceof RoutingError && err.kind === 'network') {
-      await new Promise(r => setTimeout(r, 500));
-      return provider.route(from, to, signal);
+  // no-route는 재시도 무의미, quota(daily)는 당일 불가
+  const NO_RETRY_KINDS: string[] = ['no-route', 'quota'];
+  const DELAYS = [1200, 3000, 6000];
+
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= DELAYS.length; attempt++) {
+    try {
+      return await provider.route(from, to, signal);
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') throw err;
+      if (err instanceof RoutingError && NO_RETRY_KINDS.includes(err.kind)) throw err;
+      lastErr = err;
+      if (attempt < DELAYS.length) {
+        await new Promise<void>(r => setTimeout(r, DELAYS[attempt]));
+      }
     }
-    throw err;
   }
+  throw lastErr;
 }

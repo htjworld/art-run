@@ -14,7 +14,7 @@ export interface RoutingProvider {
 
 export class RoutingError extends Error {
   constructor(
-    public readonly kind: 'quota' | 'no-route' | 'network' | 'unknown',
+    public readonly kind: 'quota' | 'no-route' | 'network' | 'unknown' | 'rate-limit',
     message: string
   ) {
     super(message);

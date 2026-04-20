@@ -7,7 +7,7 @@ import { initPointMode } from './draw/pointMode';
 import { initDragMode } from './draw/dragMode';
 import { drawStore } from './draw/drawStore';
 import { routeStore, getComposedLine, getPendingLines, getErrorLines } from './draw/routeComposer';
-import { setRoutingProvider, onSegmentErrorRemovePoint } from './draw/routeComposer';
+import { setRoutingProvider } from './draw/routeComposer';
 import { OrsClient } from './routing/orsClient';
 import { createToolbar } from './ui/toolbar';
 import { createModeToggle } from './ui/modeToggle';
@@ -144,11 +144,6 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
 
   drawStore.subscribe(syncMapLayers);
   routeStore.subscribe(() => syncMapLayers());
-
-  onSegmentErrorRemovePoint(toId => {
-    drawStore.removePoint(toId);
-    routeStore.removeSegmentsForPoint(toId);
-  });
 
   // 초기 동기화
   syncMapLayers();

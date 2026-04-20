@@ -3,8 +3,19 @@ import type { LngLat } from '../util/coord';
 import { coordKey } from '../util/coord';
 import type { Point } from './drawStore';
 import type { RoutingProvider } from '../routing/provider';
+import { RoutingError } from '../routing/provider';
 import { routeWithRetry } from '../routing/orsClient';
 import { showToast } from '../ui/toast';
+
+// 동일 에러 3초 내 중복 토스트 방지
+const lastToastAt = new Map<string, number>();
+function showRoutingError(msg: string, kind: string): void {
+  const now = Date.now();
+  if ((now - (lastToastAt.get(kind) ?? 0)) > 3000) {
+    lastToastAt.set(kind, now);
+    showToast(msg, 'error');
+  }
+}
 
 export interface Segment {
   key: string;
@@ -23,7 +34,7 @@ export interface RouteState {
 
 type RouteListener = (state: RouteState) => void;
 
-const MAX_PARALLEL = 6;
+const MAX_PARALLEL = 2;
 
 function createRouteStore() {
   let state: RouteState = {
@@ -107,14 +118,9 @@ export const routeStore = createRouteStore();
 const abortControllers = new Map<string, AbortController>();
 
 let provider: RoutingProvider | null = null;
-let onErrorRemove: ((toId: string) => void) | null = null;
 
 export function setRoutingProvider(p: RoutingProvider): void {
   provider = p;
-}
-
-export function onSegmentErrorRemovePoint(cb: (toId: string) => void): void {
-  onErrorRemove = cb;
 }
 
 export function getComposedLine(points: Point[]): LineString | null {
@@ -240,10 +246,18 @@ async function routeSegments(pairs: [Point, Point][]): Promise<void> {
       });
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') return;
-      if ((err as Error).message) {
-        showToast((err as Error).message, 'error');
-      }
-      setTimeout(() => onErrorRemove?.(b.id), 800);
+      // 에러 시 점 삭제 대신 에러 세그먼트로 유지 (빨간 점선 표시)
+      routeStore.setSegment({
+        key,
+        fromId: a.id,
+        toId: b.id,
+        line: { type: 'LineString', coordinates: [[a.lng, a.lat], [b.lng, b.lat]] },
+        meters: 0,
+        status: 'error',
+      });
+      const kind = err instanceof RoutingError ? err.kind : 'unknown';
+      const msg = err instanceof Error ? err.message : '경로 계산에 실패했어요.';
+      showRoutingError(msg, kind);
     } finally {
       abortControllers.delete(key);
     }
