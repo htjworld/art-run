@@ -56,7 +56,7 @@ export async function initMap(container: HTMLElement): Promise<Map> {
     new maplibregl.GeolocateControl({
       positionOptions: { enableHighAccuracy: true },
       trackUserLocation: false,
-      showAccuracyCircle: true,
+      showAccuracyCircle: false,
     }),
     'bottom-right'
   );

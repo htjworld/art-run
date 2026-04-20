@@ -47,7 +47,7 @@ export const overlayArtrunLayer: LineLayerSpecification = {
   minzoom: 10,
   layout: { 'line-cap': 'round', 'line-join': 'round' },
   paint: {
-    'line-color': '#BDEFFC',
+    'line-color': '#242424',
     'line-width': 5,
     'line-opacity': 0,
     'line-dasharray': [4, 3],
@@ -61,7 +61,7 @@ export const overlayScenicLayer: LineLayerSpecification = {
   minzoom: 10,
   layout: { 'line-cap': 'round', 'line-join': 'round' },
   paint: {
-    'line-color': '#BDEFFC',
+    'line-color': '#242424',
     'line-width': 5,
     'line-opacity': 0,
   },
@@ -80,7 +80,7 @@ export const overlaySymbolsLayer: SymbolLayerSpecification = {
     'symbol-placement': 'point',
   },
   paint: {
-    'text-color': '#0B1220',
+    'text-color': '#242424',
     'text-halo-color': '#FFFFFF',
     'text-halo-width': 1.5,
   },
@@ -130,7 +130,7 @@ export const routeDoneLayer: LineLayerSpecification = {
   source: SRC_ROUTE,
   layout: { 'line-cap': 'round', 'line-join': 'round' },
   paint: {
-    'line-color': '#BDEFFC',
+    'line-color': '#242424',
     'line-width': 5,
   },
 };
@@ -150,9 +150,9 @@ export const pointsLayer: CircleLayerSpecification = {
   type: 'circle',
   source: SRC_POINTS,
   paint: {
-    'circle-color': '#BDEFFC',
+    'circle-color': '#242424',
     'circle-radius': 7,
-    'circle-stroke-color': '#0B1220',
+    'circle-stroke-color': '#FFFFFF',
     'circle-stroke-width': 1.5,
   },
 };
@@ -169,7 +169,7 @@ export const pointsLabelLayer: SymbolLayerSpecification = {
     'text-ignore-placement': true,
   },
   paint: {
-    'text-color': '#0B1220',
+    'text-color': '#242424',
   },
 };
 
