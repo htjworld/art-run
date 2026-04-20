@@ -72,32 +72,35 @@ async function downloadGpx(page: import('playwright').Page, courseId: number): P
 }
 
 async function main(): Promise<void> {
-  // 실제 Chrome 프로필로 실행 — navigator.webdriver 감지 우회
-  const chromeUserData = process.env.CHROME_USER_DATA ??
-    `C:\\Users\\${process.env.USERNAME}\\AppData\\Local\\Google\\Chrome\\User Data`;
+  console.log('');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('  Garmin Connect 스크래퍼');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('');
+  console.log('준비 방법:');
+  console.log('  1. 터미널을 새로 열어 아래 명령어로 Chrome을 실행하세요:');
+  console.log('');
+  console.log('     "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9222');
+  console.log('');
+  console.log('  2. 열린 Chrome에서 https://connect.garmin.com 로그인');
+  console.log('  3. 로그인 완료 후 아래에서 Enter');
+  console.log('');
 
-  console.log(`Chrome 프로필 경로: ${chromeUserData}`);
-  console.log('⚠️  실행 전 Chrome을 모두 닫아주세요!\n');
-  await ask('Chrome을 닫았으면 Enter를 눌러 계속하세요...');
+  await ask('Chrome 로그인 완료 후 Enter를 누르세요...');
 
-  const context = await chromium.launchPersistentContext(chromeUserData, {
-    channel: 'chrome',
-    headless: false,
-    slowMo: 50,
-    locale: 'ko-KR',
-    timezoneId: 'Asia/Seoul',
-    args: [
-      '--disable-blink-features=AutomationControlled',
-      '--no-first-run',
-      '--no-default-browser-check',
-    ],
-  });
+  console.log('\n🔌 Chrome에 연결 중...');
 
-  // navigator.webdriver 숨기기
-  await context.addInitScript(() => {
-    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-  });
-  const page = await context.newPage();
+  let context: import('playwright').BrowserContext;
+  try {
+    const browser = await chromium.connectOverCDP('http://localhost:9222');
+    context = browser.contexts()[0] ?? await browser.newContext();
+  } catch {
+    console.error('❌ Chrome 원격 디버깅 연결 실패.');
+    console.error('   위의 chrome.exe 명령어로 Chrome을 먼저 실행했는지 확인하세요.');
+    process.exit(1);
+  }
+
+  const page = context.pages()[0] ?? await context.newPage();
 
   console.log('\n🌐 Garmin Connect 로그인 페이지를 엽니다...');
   await page.goto('https://connect.garmin.com/signin');
