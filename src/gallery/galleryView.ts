@@ -10,6 +10,21 @@ import { startRouteAnimation, stopRouteAnimation } from '../map/routeAnimator';
 let allCourses: Course[] = [];
 let onCourseSelect: ((id: string | null) => void) | null = null;
 let selectedId: string | null = null;
+let userPos: [number, number] | null = null; // [lng, lat]
+
+function distKmTo(course: Course): number {
+  if (!userPos) return Infinity;
+  const [ux, uy] = userPos;
+  const [cx, cy] = course.center;
+  const dx = (cx - ux) * Math.cos((uy * Math.PI) / 180);
+  const dy = cy - uy;
+  return Math.sqrt(dx * dx + dy * dy) * 111.32;
+}
+
+function sortedByDistance(courses: Course[]): Course[] {
+  if (!userPos) return courses;
+  return [...courses].sort((a, b) => distKmTo(a) - distKmTo(b));
+}
 
 export function initGallery(
   container: HTMLElement,
@@ -38,6 +53,17 @@ export function initGallery(
 
   setActive('artrun');
   renderList(listContainer, 'artrun');
+
+  // 위치 권한 요청 → 가져오면 현재 탭 재정렬
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      userPos = [pos.coords.longitude, pos.coords.latitude];
+      // 현재 보이는 탭 재렌더
+      const activeTab = (container.querySelector('.tabs__btn.active') as HTMLElement | null)
+        ?.dataset.tab as CourseType | undefined;
+      renderList(listContainer, activeTab ?? 'artrun');
+    }, () => { /* 거부 시 기본 순서 유지 */ }, { timeout: 5000 });
+  }
 }
 
 function renderList(container: HTMLElement, type: CourseType): void {
@@ -51,7 +77,8 @@ function renderList(container: HTMLElement, type: CourseType): void {
     return;
   }
 
-  for (const course of filtered) {
+  const sorted = sortedByDistance(filtered);
+  for (const course of sorted) {
     container.appendChild(createCard(course));
   }
 }
