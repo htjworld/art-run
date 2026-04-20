@@ -5,7 +5,7 @@ import { getMap } from './mapView';
 const SRC = 'route-anim-dot';
 const LYR = 'route-anim-dot';
 
-const TRAVEL_MS = 2500; // 시작 → 끝 이동 시간
+const TRAVEL_MS = 3800; // 시작 → 끝 이동 시간
 const PAUSE_MS = 1000;  // 양 끝 대기 시간
 
 let rafId: number | null = null;
