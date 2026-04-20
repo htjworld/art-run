@@ -2,6 +2,7 @@ import './ui/styles.css';
 import { initMap, updateRouteSource, updatePendingSource, updateErrorSource, updatePointsSource, resizeMap } from './map/mapView';
 import { initInteractions } from './map/interactions';
 import { loadOverlay } from './map/overlay';
+import { initRouteAnimator } from './map/routeAnimator';
 import { initPointMode } from './draw/pointMode';
 import { initDragMode } from './draw/dragMode';
 import { drawStore } from './draw/drawStore';
@@ -96,6 +97,9 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
 
   // 오버레이 로드
   loadOverlay(courses);
+
+  // 경로 애니메이션 초기화
+  initRouteAnimator();
 
   // 바텀시트 (모바일)
   const { el: sheetEl } = createBottomSheet(mapWrap);

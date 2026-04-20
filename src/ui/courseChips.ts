@@ -3,6 +3,7 @@ import type { Course, CourseType } from '../gallery/courses';
 import { showOnlyCourse } from '../map/overlay';
 import { getMap } from '../map/mapView';
 import { triggerGpxDownload } from '../gpx/export';
+import { startRouteAnimation, stopRouteAnimation } from '../map/routeAnimator';
 
 let selectedId: string | null = null;
 let activeTab: CourseType = 'artrun';
@@ -111,11 +112,13 @@ function toggleCourse(course: Course): void {
     selectedId = null;
     showOnlyCourse(null);
     hideInfoPanel();
+    stopRouteAnimation();
   } else {
     selectedId = course.id;
     showOnlyCourse(course.id);
     showInfoPanel(course);
     map.flyTo({ center: course.center, zoom: course.zoom, duration: 1200, essential: true });
+    if (course.route) startRouteAnimation(course.route);
   }
 
   renderChips(activeTab);

@@ -5,6 +5,7 @@ import { triggerGpxDownload } from '../gpx/export';
 import { loadCourse } from './loadCourse';
 import { getMap } from '../map/mapView';
 import { showOnlyCourse } from '../map/overlay';
+import { startRouteAnimation } from '../map/routeAnimator';
 
 let allCourses: Course[] = [];
 let onCourseSelect: ((id: string | null) => void) | null = null;
@@ -132,6 +133,7 @@ function createCard(course: Course): HTMLElement {
       essential: true,
     });
     showOnlyCourse(course.id);
+    if (course.route) startRouteAnimation(course.route);
     onCourseSelect?.(course.id);
   });
 
