@@ -70,10 +70,7 @@ export async function initMap(container: HTMLElement): Promise<Map> {
   // 베이스 맵 스타일의 누락 스프라이트 이미지 → 투명 1×1 placeholder로 대체
   map.on('styleimagemissing', (e: { id: string }) => {
     if (!e.id) return;
-    const canvas = document.createElement('canvas');
-    canvas.width = 1;
-    canvas.height = 1;
-    map.addImage(e.id, canvas);
+    map.addImage(e.id, { width: 1, height: 1, data: new Uint8Array(4) });
   });
 
   // 소스 등록
