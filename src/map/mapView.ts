@@ -141,7 +141,7 @@ export function flyToCourse(course: Course): void {
       [Math.min(...lngs), Math.min(...lats)],
       [Math.max(...lngs), Math.max(...lats)],
     ];
-    map.fitBounds(bounds, { padding: 60, duration: 1200, essential: true });
+    map.fitBounds(bounds, { padding: 80, maxZoom: 14, duration: 1200, essential: true });
   } else {
     map.flyTo({ center: course.center, zoom: course.zoom, duration: 1200, essential: true });
   }
