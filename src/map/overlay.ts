@@ -44,8 +44,8 @@ function applyFilter(): void {
 
   if (!selectedId || selectedId === editingId) {
     for (const lyr of OVERLAY_LAYERS) {
+      map.setFilter(lyr, ['==', ['get', 'id'], ''] as FilterSpecification);
       map.setPaintProperty(lyr, 'line-opacity', 0);
-      map.setFilter(lyr, null);
     }
     return;
   }

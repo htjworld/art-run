@@ -66,11 +66,12 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
   drawOverlay.className = 'draw-overlay';
   mapWrap.appendChild(drawOverlay);
 
-  // 힌트 텍스트
+  // 힌트 텍스트 (3초 후 자동 제거)
   const hint = document.createElement('div');
   hint.className = 'map-hint';
   hint.textContent = '지도를 탭해서 그림 그리기를 시작해요';
   mapWrap.appendChild(hint);
+  setTimeout(() => hint.classList.add('hidden'), 3000);
 
   // 지도 초기화
   const map = await initMap(mapEl);

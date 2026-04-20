@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
     "preview": "vite preview",
-    "precompute": "tsx scripts/build-gallery.ts"
+    "precompute": "tsx scripts/build-gallery.ts",
+    "export-routes": "tsx scripts/export-routes.ts"
   },
   "dependencies": {
     "@turf/bbox": "^7.1.0",
