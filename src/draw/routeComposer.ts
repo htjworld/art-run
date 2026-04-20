@@ -256,16 +256,6 @@ export async function recomputeAdjacent(
   await routeSegments(pairs);
 }
 
-/** 전체 세그먼트 재계산 */
-export async function recomputeAll(points: Point[]): Promise<void> {
-  if (points.length < 2) return;
-  const pairs: [Point, Point][] = [];
-  for (let i = 0; i < points.length - 1; i++) {
-    pairs.push([points[i], points[i + 1]]);
-  }
-  await routeSegments(pairs);
-}
-
 async function routeSegments(pairs: [Point, Point][]): Promise<void> {
   if (!provider) return;
 
