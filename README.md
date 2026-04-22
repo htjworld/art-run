@@ -28,7 +28,7 @@
 
 | <경로 그리기 화면> | <코스 갤러리 화면> |
 |---|---|
-| ![draw](./assets/draw.gif) | ![gallery](./assets/gallery.png) |
+| ![draw](./assets/draw.png) | ![gallery](./assets/gallery.png) |
 
 ## Tech Stack
 
