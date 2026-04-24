@@ -110,8 +110,3 @@ export function setDragOverlayActive(active: boolean): void {
   overlay.style.cursor = active ? 'crosshair' : '';
 }
 
-export function destroyDragMode(): void {
-  isCapturing = false;
-  map = null;
-  overlay = null;
-}

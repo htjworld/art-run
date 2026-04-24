@@ -148,13 +148,6 @@ function applyUndo(): void {
       drawStore.setPoints(pts);
       break;
     }
-    case 'move':
-      drawStore.updatePoint(op.id, op.from[0], op.from[1]);
-      break;
-    case 'dragBatch':
-      drawStore.setPoints([]);
-      routeStore.clear();
-      break;
     case 'drawBatch': {
       const pts = drawStore.getState().points.filter(
         p => p.id !== op.startPoint.id && p.id !== op.endPoint.id,
@@ -182,13 +175,6 @@ function applyRedo(): void {
     case 'delete':
       drawStore.removePoint(op.point.id);
       routeStore.removeSegmentsForPoint(op.point.id);
-      break;
-    case 'move':
-      drawStore.updatePoint(op.id, op.to[0], op.to[1]);
-      break;
-    case 'dragBatch':
-      drawStore.setPoints(op.points);
-      routeStore.clear();
       break;
     case 'drawBatch': {
       const currentPts = drawStore.getState().points;
@@ -227,7 +213,3 @@ export function fitToBounds(): void {
   m.fitBounds([[minX, minY], [maxX, maxY]], { padding: 80, maxZoom: 17 });
 }
 
-export function destroyInteractions(): void {
-  document.removeEventListener('keydown', onKeyDown);
-  map = null;
-}

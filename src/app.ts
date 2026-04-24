@@ -76,6 +76,35 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
   titlebarLogo.addEventListener('click', resetAll);
   titlebarLogo.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') resetAll(); });
   titlebar.appendChild(titlebarLogo);
+
+  // 모바일 위치 검색 영역
+  const titlebarSearch = document.createElement('div');
+  titlebarSearch.className = 'titlebar__search';
+  titlebar.appendChild(titlebarSearch);
+
+  // 모바일 현재 위치 버튼
+  const locateBtn = document.createElement('button');
+  locateBtn.className = 'titlebar__locate';
+  locateBtn.setAttribute('aria-label', '현재 위치로 이동');
+  locateBtn.setAttribute('title', '현재 위치로 이동');
+  locateBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+  </svg>`;
+  locateBtn.addEventListener('click', () => {
+    const pos = getLastPosition();
+    if (pos) {
+      flyToPoint(pos[0], pos[1], 15);
+    } else {
+      navigator.geolocation?.getCurrentPosition(
+        p => flyToPoint(p.coords.longitude, p.coords.latitude, 15),
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000 },
+      );
+    }
+  });
+  titlebar.appendChild(locateBtn);
+
   rootEl.appendChild(titlebar);
 
   // 레이아웃
@@ -150,10 +179,11 @@ export async function initApp(rootEl: HTMLElement): Promise<void> {
   // 모드 토글
   createModeToggle(mapWrap);
 
-  // 위치 검색 (데스크톱 사이드바 상단)
+  // 위치 검색 (데스크톱 사이드바 + 모바일 타이틀바)
   const kakaoKey = import.meta.env.VITE_KAKAO_KEY as string | undefined;
   if (kakaoKey) {
     createLocationSearch(sidebarTop, kakaoKey);
+    createLocationSearch(titlebarSearch, kakaoKey);
   }
 
   // 갤러리 (데스크톱 사이드바)

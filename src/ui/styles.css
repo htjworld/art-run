@@ -66,12 +66,60 @@ html, body {
   display: none;
   height: var(--titlebar-h);
   align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
+  gap: 8px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--line);
   background: var(--bg);
   z-index: 100;
   flex-shrink: 0;
+}
+
+.titlebar__search {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.titlebar__search .location-search {
+  width: 100%;
+}
+
+.titlebar__search .location-search__input-wrap {
+  height: 34px;
+  padding: 0 10px;
+}
+
+.titlebar__search .location-search__input {
+  font-size: 13px;
+}
+
+.titlebar__search .location-search__dropdown {
+  z-index: 200;
+}
+
+.titlebar__locate {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition), color var(--transition);
+  padding: 0;
+}
+
+.titlebar__locate:hover {
+  background: #F3F4F6;
+}
+
+.titlebar__locate:active {
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .logo-btn {

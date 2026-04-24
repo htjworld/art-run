@@ -5,7 +5,6 @@ import type { GeoJSONSource, FilterSpecification } from 'maplibre-gl';
 import type { Course } from '../gallery/courses';
 
 let selectedId: string | null = null;
-let editingId: string | null = null;
 
 export function loadOverlay(courses: Course[]): void {
   const map = getMap();
@@ -30,11 +29,6 @@ export function showOnlyCourse(id: string | null): void {
   applyFilter();
 }
 
-export function setEditingCourse(id: string | null): void {
-  editingId = id;
-  applyFilter();
-}
-
 const OVERLAY_LAYERS = [LYR_OVERLAY_HALO, LYR_OVERLAY_ARTRUN, LYR_OVERLAY_SCENIC] as const;
 
 function applyFilter(): void {
@@ -42,7 +36,7 @@ function applyFilter(): void {
 
   if (!OVERLAY_LAYERS.every(id => map.getLayer(id))) return;
 
-  if (!selectedId || selectedId === editingId) {
+  if (!selectedId) {
     for (const lyr of OVERLAY_LAYERS) {
       map.setFilter(lyr, ['==', ['get', 'id'], ''] as FilterSpecification);
       map.setPaintProperty(lyr, 'line-opacity', 0);

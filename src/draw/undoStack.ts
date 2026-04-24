@@ -3,9 +3,7 @@ import type { LngLat } from '../util/coord';
 
 export type Op =
   | { t: 'add'; point: Point }
-  | { t: 'move'; id: string; from: LngLat; to: LngLat }
   | { t: 'delete'; index: number; point: Point }
-  | { t: 'dragBatch'; points: Point[] }
   | { t: 'drawBatch'; startPoint: Point; endPoint: Point; drawnCoords: LngLat[]; prevPointId: string | null }
   | { t: 'clear'; prev: Point[] };
 
@@ -41,10 +39,6 @@ function createUndoStack() {
       if (history.length > MAX_HISTORY) history.shift();
       cursor = history.length - 1;
       notify();
-    },
-
-    peekUndo(): Op | undefined {
-      return history[cursor];
     },
 
     undo(): Op | undefined {

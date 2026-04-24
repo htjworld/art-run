@@ -68,7 +68,7 @@ pnpm dev
 |---|---|---|
 | `VITE_ORS_KEY` | OpenRouteService API 키 — 경로 계산에 사용 | 경로 그리기 비활성 |
 | `VITE_MAP_KEY` | MapTiler Cloud API 키 — 한국어 지도 타일 | OpenFreeMap으로 대체 |
-| `VITE_KAKAO_KEY` | 카카오 JavaScript API 키 — 위치 검색에 사용 | 사이드바 위치 검색 비활성 |
+| `VITE_KAKAO_KEY` | 카카오 JavaScript API 키 — 위치 검색에 사용 | 위치 검색 비활성 (모바일·데스크톱 공통) |
 
 ## License
 

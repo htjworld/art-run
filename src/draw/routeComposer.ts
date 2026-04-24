@@ -319,7 +319,7 @@ async function routeSegments(pairs: [Point, Point][]): Promise<void> {
     }
   }
 
-  // 6개 병렬 처리
+  // MAX_PARALLEL 제한 병렬 처리
   const running: Promise<void>[] = [];
   for (const [a, b] of queue) {
     if (running.length >= MAX_PARALLEL) {

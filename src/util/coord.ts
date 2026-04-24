@@ -12,9 +12,6 @@ export function lngLatToGpxPt(ll: LngLat): GpxPt {
   return { lat: ll[1], lon: ll[0] };
 }
 
-export function gpxPtToLngLat(pt: GpxPt): LngLat {
-  return [pt.lon, pt.lat];
-}
 
 /** 세그먼트 캐시 키 — 소수점 5자리 반올림 */
 export function coordKey(a: LngLat, b: LngLat): string {

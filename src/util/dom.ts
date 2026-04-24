@@ -16,28 +16,4 @@ export function el<K extends keyof HTMLElementTagNameMap>(
   return e;
 }
 
-export function qs<E extends Element = Element>(
-  selector: string,
-  root: ParentNode = document
-): E {
-  const found = root.querySelector<E>(selector);
-  if (!found) throw new Error(`Element not found: ${selector}`);
-  return found;
-}
 
-export function qsAll<E extends Element = Element>(
-  selector: string,
-  root: ParentNode = document
-): NodeListOf<E> {
-  return root.querySelectorAll<E>(selector);
-}
-
-export function on<K extends keyof HTMLElementEventMap>(
-  el: HTMLElement,
-  type: K,
-  handler: (e: HTMLElementEventMap[K]) => void,
-  options?: AddEventListenerOptions
-): () => void {
-  el.addEventListener(type, handler as EventListener, options);
-  return () => el.removeEventListener(type, handler as EventListener, options);
-}

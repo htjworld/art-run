@@ -73,9 +73,3 @@ export function initPointMode(mapInstance: MapLibre): void {
   cleanup.push(() => map!.off('click', clickHandler));
 }
 
-export function destroyPointMode(): void {
-  cleanup.forEach(fn => fn());
-  cleanup = [];
-  debouncedRecompute.cancel();
-  map = null;
-}
