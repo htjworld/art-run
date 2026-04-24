@@ -80,6 +80,10 @@ html, body {
   position: relative;
 }
 
+.titlebar__search:empty {
+  display: none;
+}
+
 .titlebar__search .location-search {
   width: 100%;
 }
@@ -97,30 +101,6 @@ html, body {
   z-index: 200;
 }
 
-.titlebar__locate {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: var(--r-sm);
-  color: var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background var(--transition), color var(--transition);
-  padding: 0;
-}
-
-.titlebar__locate:hover {
-  background: #F3F4F6;
-}
-
-.titlebar__locate:active {
-  background: var(--accent);
-  color: var(--on-accent);
-}
 
 .logo-btn {
   height: 32px;

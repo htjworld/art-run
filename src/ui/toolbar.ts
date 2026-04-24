@@ -7,6 +7,8 @@ import { openGpxModal, openClearModal } from './modal';
 import { formatDistanceShort } from '../util/format';
 import { triggerGpxDownload } from '../gpx/export';
 import { getComposedLine } from '../draw/routeComposer';
+import { flyToPoint } from '../map/mapView';
+import { getLastPosition } from '../util/userLocation';
 
 function svgIcon(d: string): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
@@ -56,6 +58,13 @@ export function createToolbar(container: HTMLElement): HTMLElement {
   }) as HTMLButtonElement;
   fitBtn.innerHTML = svgIcon(ICONS.fitBounds);
 
+  const locateBtn = el('button', {
+    class: 'toolbar__btn',
+    'aria-label': '현재 위치로 이동',
+    title: '현재 위치로 이동',
+  }) as HTMLButtonElement;
+  locateBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>`;
+
   const divider = el('div', { class: 'toolbar__divider', role: 'separator' });
 
   distanceEl = el('span', { class: 'toolbar__distance', 'aria-live': 'polite' }, '0.0 km') as HTMLSpanElement;
@@ -85,6 +94,18 @@ export function createToolbar(container: HTMLElement): HTMLElement {
     });
   });
   fitBtn.addEventListener('click', fitToBounds);
+  locateBtn.addEventListener('click', () => {
+    const pos = getLastPosition();
+    if (pos) {
+      flyToPoint(pos[0], pos[1], 15);
+    } else {
+      navigator.geolocation?.getCurrentPosition(
+        p => flyToPoint(p.coords.longitude, p.coords.latitude, 15),
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000 },
+      );
+    }
+  });
   gpxBtn.addEventListener('click', () => {
     const pts = drawStore.getState().points;
     const line = getComposedLine(pts);
@@ -98,6 +119,7 @@ export function createToolbar(container: HTMLElement): HTMLElement {
   toolbar.appendChild(redoBtn);
   toolbar.appendChild(trashBtn);
   toolbar.appendChild(fitBtn);
+  toolbar.appendChild(locateBtn);
   toolbar.appendChild(divider);
   toolbar.appendChild(distanceEl);
   toolbar.appendChild(gpxBtn);
